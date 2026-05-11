@@ -4,865 +4,403 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Plan A — Cryo-EM Map-Model Alignment Dataset</title>
-<meta name="description" content="A large-scale cryo-EM labeling dataset for deep learning-based map-model alignment research">
-
-<!-- Three.js for 3D visualization -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
+<meta name="description" content="Large-scale cryo-EM labeling dataset for deep learning structural biology">
+<script src="https://cdn.jsdelivr.net/npm/ngl@2.0.0-dev.38/dist/ngl.js"></script>
 <style>
 :root {
-  --bg: #050a14;
-  --surface: #0d1626;
-  --surface2: #111f35;
-  --accent: #00c8ff;
-  --accent2: #7b61ff;
-  --accent3: #00ff9d;
-  --text: #e2eaf4;
-  --text-dim: #7a93b4;
-  --gold: #ffd700;
-  --silver: #c0c8d8;
-  --bronze: #cd7f32;
+  --bg:#030810;--surface:#0a1220;--surface2:#0f1c30;
+  --accent:#00d4ff;--accent2:#8b5cf6;--accent3:#10b981;
+  --gold:#f59e0b;--silver:#94a3b8;--bronze:#b45309;
+  --text:#e2eaf8;--text-dim:#64748b;
 }
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow-x: hidden;
-}
-
-/* ── Language Toggle ── */
-.lang-bar {
-  position: fixed; top: 0; right: 0; z-index: 1000;
-  display: flex; gap: 0; padding: 12px 20px;
-  background: rgba(5,10,20,0.85); backdrop-filter: blur(12px);
-  border-bottom-left-radius: 12px;
-}
-.lang-btn {
-  padding: 6px 16px; border: none; cursor: pointer;
-  font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
-  border-radius: 6px; transition: all 0.2s;
-  background: transparent; color: var(--text-dim);
-}
-.lang-btn.active { background: var(--accent); color: #000; }
-
-/* ── Hero ── */
-#hero {
-  position: relative; height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  text-align: center; overflow: hidden;
-}
-#hero-canvas {
-  position: absolute; inset: 0; z-index: 0;
-}
-.hero-content { position: relative; z-index: 1; padding: 0 20px; }
-.hero-badge {
-  display: inline-block; padding: 5px 18px;
-  border: 1px solid var(--accent); border-radius: 20px;
-  font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 24px;
-}
-h1 {
-  font-size: clamp(2.5rem, 6vw, 5rem);
-  font-weight: 800; line-height: 1.1;
-  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 20px;
-}
-.hero-sub {
-  font-size: clamp(1rem, 2vw, 1.3rem);
-  color: var(--text-dim); max-width: 700px; line-height: 1.7;
-  margin-bottom: 40px;
-}
-.hero-stats {
-  display: flex; gap: 40px; justify-content: center;
-  flex-wrap: wrap; margin-bottom: 40px;
-}
-.stat-item { text-align: center; }
-.stat-num {
-  font-size: 2.5rem; font-weight: 800;
-  background: linear-gradient(to right, var(--accent), var(--accent3));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.stat-label { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
-
-.btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-.btn {
-  padding: 14px 32px; border-radius: 8px; font-size: 15px;
-  font-weight: 600; cursor: pointer; text-decoration: none;
-  transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
-}
-.btn-primary { background: var(--accent); color: #000; }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,200,255,0.35); }
-.btn-outline { border: 1.5px solid var(--accent2); color: var(--accent2); background: transparent; }
-.btn-outline:hover { background: rgba(123,97,255,0.15); transform: translateY(-2px); }
-
-.scroll-hint {
-  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  color: var(--text-dim); font-size: 12px; animation: bounce 2s infinite;
-}
-@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
-.scroll-arrow { width: 20px; height: 20px; border-right: 2px solid var(--text-dim); border-bottom: 2px solid var(--text-dim); transform: rotate(45deg); }
-
-/* ── Section ── */
-section { padding: 100px 20px; max-width: 1200px; margin: 0 auto; }
-.section-label {
-  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 16px;
-}
-h2 {
-  font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; margin-bottom: 20px;
-  background: linear-gradient(to right, #fff, var(--text-dim));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.section-desc { font-size: 1.1rem; color: var(--text-dim); line-height: 1.8; max-width: 750px; margin-bottom: 60px; }
-
-/* ── Pipeline ── */
-.pipeline-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;
-}
-.pipeline-card {
-  background: var(--surface); border: 1px solid rgba(0,200,255,0.12);
-  border-radius: 16px; padding: 28px; position: relative; overflow: hidden;
-  transition: all 0.3s;
-}
-.pipeline-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(to right, var(--accent), var(--accent2));
-  opacity: 0; transition: opacity 0.3s;
-}
-.pipeline-card:hover { transform: translateY(-4px); border-color: rgba(0,200,255,0.35); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
-.pipeline-card:hover::before { opacity: 1; }
-.step-num { font-size: 0.8rem; color: var(--accent); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
-.step-icon { font-size: 2.2rem; margin-bottom: 12px; }
-.step-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-.step-desc { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; }
-
-/* ── Label Channels ── */
-.labels-section { background: linear-gradient(180deg, var(--bg) 0%, var(--surface2) 50%, var(--bg) 100%); }
-.labels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-.label-card {
-  border-radius: 14px; padding: 24px 20px; text-align: center;
-  position: relative; overflow: hidden; cursor: pointer;
-  transition: all 0.3s; border: 1px solid transparent;
-}
-.label-card:hover { transform: scale(1.04); border-color: var(--accent); }
-.label-viz { height: 80px; border-radius: 8px; margin-bottom: 16px; position: relative; overflow: hidden; }
-.label-canvas { width: 100%; height: 100%; }
-.label-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
-.label-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
-.label-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; margin-top: 8px; }
-
-/* ── 3D Viz Section ── */
-#viz-section { text-align: center; }
-#protein-canvas-wrap {
-  width: 100%; max-width: 800px; height: 500px; margin: 0 auto 40px;
-  border-radius: 20px; overflow: hidden; position: relative;
-  border: 1px solid rgba(0,200,255,0.2);
-  background: var(--surface);
-  box-shadow: 0 0 80px rgba(0,200,255,0.08);
-}
-#protein-canvas { width: 100%; height: 100%; display: block; }
-.viz-controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
-.viz-btn {
-  padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0,200,255,0.3);
-  background: rgba(0,200,255,0.08); color: var(--accent); cursor: pointer;
-  font-size: 13px; font-weight: 600; transition: all 0.2s;
-}
-.viz-btn.active, .viz-btn:hover { background: rgba(0,200,255,0.2); border-color: var(--accent); }
-.viz-legend { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-.legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-/* ── Tier Cards ── */
-.tier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 40px; }
-.tier-card {
-  border-radius: 16px; padding: 32px 24px; text-align: center;
-  position: relative; overflow: hidden;
-}
-.tier-card.gold { background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.04)); border: 1px solid rgba(255,215,0,0.3); }
-.tier-card.silver { background: linear-gradient(135deg, rgba(192,200,216,0.12), rgba(192,200,216,0.04)); border: 1px solid rgba(192,200,216,0.3); }
-.tier-card.bronze { background: linear-gradient(135deg, rgba(205,127,50,0.12), rgba(205,127,50,0.04)); border: 1px solid rgba(205,127,50,0.3); }
-.tier-card.reject { background: linear-gradient(135deg, rgba(255,60,60,0.08), rgba(255,60,60,0.02)); border: 1px solid rgba(255,60,60,0.2); }
-.tier-icon { font-size: 2.5rem; margin-bottom: 12px; }
-.tier-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
-.tier-name.gold { color: var(--gold); }
-.tier-name.silver { color: var(--silver); }
-.tier-name.bronze { color: var(--bronze); }
-.tier-criteria { font-size: 0.83rem; color: var(--text-dim); line-height: 1.7; }
-
-/* ── Impact ── */
-.impact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-.impact-card {
-  background: var(--surface); border: 1px solid rgba(123,97,255,0.2);
-  border-radius: 16px; padding: 32px;
-  transition: all 0.3s;
-}
-.impact-card:hover { transform: translateY(-4px); border-color: var(--accent2); }
-.impact-icon { font-size: 2.5rem; margin-bottom: 16px; }
-.impact-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
-.impact-desc { font-size: 0.9rem; color: var(--text-dim); line-height: 1.7; }
-
-/* ── Footer ── */
-footer {
-  text-align: center; padding: 60px 20px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  color: var(--text-dim); font-size: 0.9rem;
-  background: var(--surface);
-}
-footer a { color: var(--accent); text-decoration: none; }
-
-/* ── Divider ── */
-.divider { height: 1px; background: linear-gradient(to right, transparent, rgba(0,200,255,0.2), transparent); margin: 0; }
-
-/* ── En/Zh display ── */
-.zh { display: none; }
-body.zh-mode .en { display: none; }
-body.zh-mode .zh { display: block; }
-body.zh-mode .zh-inline { display: inline; }
-.zh-inline { display: none; }
-body.zh-mode .en-inline { display: none; }
-.en-inline { display: inline; }
-
-/* scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 3px; }
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+.lang-bar{position:fixed;top:16px;right:20px;z-index:1000;display:flex;gap:4px;background:rgba(3,8,16,.85);backdrop-filter:blur(16px);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:6px 8px}
+.lang-btn{padding:5px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;transition:all .2s;background:transparent;color:var(--text-dim)}
+.lang-btn.active{background:var(--accent);color:#000}
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 20px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(0,212,255,.06) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 20% 80%,rgba(139,92,246,.05) 0%,transparent 60%)}
+.hero-bg::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:60px 60px;animation:gridpan 20s linear infinite}
+@keyframes gridpan{to{background-position:60px 60px}}
+.hero-content{position:relative;z-index:1;max-width:900px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 20px;border:1px solid rgba(0,212,255,.3);border-radius:24px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);background:rgba(0,212,255,.05);margin-bottom:28px}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:24px}
+h1 .l1{display:block;color:#fff}
+h1 .l2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 60%,var(--accent3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--text-dim);line-height:1.8;max-width:680px;margin:0 auto 44px}
+.stats-row{display:flex;justify-content:center;margin-bottom:44px;flex-wrap:wrap}
+.stat-box{padding:18px 32px;text-align:center;border:1px solid rgba(0,212,255,.1);background:rgba(10,18,32,.6)}
+.stat-box:first-child{border-radius:12px 0 0 12px}
+.stat-box:last-child{border-radius:0 12px 12px 0}
+.stat-box:not(:first-child){border-left:0}
+.stat-n{font-size:2rem;font-weight:900;color:var(--accent);line-height:1}
+.stat-l{font-size:.7rem;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{padding:13px 30px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px;border:none}
+.btn-p{background:linear-gradient(135deg,var(--accent),#0099cc);color:#000}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,212,255,.4)}
+.btn-o{border:1.5px solid var(--accent2);color:var(--accent2);background:transparent}
+.btn-o:hover{background:rgba(139,92,246,.12);transform:translateY(-3px)}
+.sw{max-width:1280px;margin:0 auto;padding:100px 24px}
+.sl{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:block}
+h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;line-height:1.2;margin-bottom:18px}
+.sd{font-size:1rem;color:var(--text-dim);line-height:1.85;max-width:720px;margin-bottom:56px}
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(0,212,255,.15),transparent)}
+/* Gallery */
+.emdb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.ec{border-radius:16px;overflow:hidden;background:var(--surface);border:1px solid rgba(0,212,255,.1);transition:all .3s;cursor:pointer}
+.ec:hover{transform:translateY(-6px);border-color:rgba(0,212,255,.35);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.ec img{width:100%;height:200px;object-fit:cover;background:#0a1220;display:block}
+.ec-info{padding:16px}
+.ec-id{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-bottom:5px}
+.ec-name{font-size:.88rem;font-weight:600;margin-bottom:8px;line-height:1.35}
+.ec-meta{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 9px;border-radius:10px;font-weight:600}
+/* Viewer */
+.vw{border-radius:20px;overflow:hidden;border:1px solid rgba(0,212,255,.18);background:var(--surface);box-shadow:0 0 100px rgba(0,212,255,.05),0 40px 80px rgba(0,0,0,.6)}
+.vh{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:rgba(10,18,32,.9);border-bottom:1px solid rgba(0,212,255,.1)}
+.vht{font-size:13px;font-weight:600;color:var(--accent)}
+.vhb{font-size:11px;background:rgba(0,212,255,.1);color:var(--accent);padding:3px 10px;border-radius:10px}
+#ngl-vp{width:100%;height:500px;display:block}
+.vcs{display:flex;gap:8px;justify-content:center;padding:16px;flex-wrap:wrap;background:rgba(10,18,32,.6)}
+.vcb{padding:7px 18px;border-radius:20px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.06);color:var(--accent);cursor:pointer;font-size:12px;font-weight:600;transition:all .2s}
+.vcb.active,.vcb:hover{background:rgba(0,212,255,.18);border-color:var(--accent)}
+/* Labels */
+.lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.lc{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.06);transition:all .3s;background:var(--surface)}
+.lc:hover{transform:translateY(-4px);border-color:rgba(0,212,255,.3)}
+.lih{height:120px;position:relative;overflow:hidden}
+.lih canvas{width:100%;height:100%;display:block}
+.lov{position:absolute;inset:0;background:linear-gradient(to top,var(--surface) 0%,transparent 55%);pointer-events:none}
+.lb{padding:14px}
+.ln{font-weight:700;font-size:.9rem;margin-bottom:5px}
+.ld{font-size:.8rem;color:var(--text-dim);line-height:1.55}
+.lchip{display:inline-block;margin-top:7px;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700}
+/* Pipeline */
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.pc{background:var(--surface);border:1px solid rgba(0,212,255,.08);border-radius:14px;padding:24px 20px;transition:all .3s}
+.pc:hover{transform:translateY(-4px);border-color:rgba(0,212,255,.25)}
+.pn{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:10px}
+.pi{font-size:1.8rem;margin-bottom:10px}
+.pt{font-size:.95rem;font-weight:700;margin-bottom:7px}
+.pd{font-size:.82rem;color:var(--text-dim);line-height:1.6}
+.ptool{display:inline-block;margin-top:8px;font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(139,92,246,.15);color:var(--accent2);font-weight:600}
+/* Tiers */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.tc{border-radius:14px;padding:28px 20px;text-align:center;border:1px solid;transition:all .3s}
+.tc:hover{transform:translateY(-4px)}
+.tc.gold{border-color:rgba(245,158,11,.4);background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.03))}
+.tc.silver{border-color:rgba(148,163,184,.35);background:linear-gradient(135deg,rgba(148,163,184,.1),rgba(148,163,184,.03))}
+.tc.bronze{border-color:rgba(180,83,9,.4);background:linear-gradient(135deg,rgba(180,83,9,.1),rgba(180,83,9,.03))}
+.tc.reject{border-color:rgba(239,68,68,.25);background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(239,68,68,.02))}
+.ti{font-size:2.5rem;margin-bottom:12px}
+.tn{font-size:1.3rem;font-weight:900;margin-bottom:10px}
+.tc.gold .tn{color:var(--gold)}.tc.silver .tn{color:var(--silver)}.tc.bronze .tn{color:var(--bronze)}.tc.reject .tn{color:#ef4444}
+.ts{font-size:.82rem;color:var(--text-dim);line-height:1.8}
+/* Impact */
+.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px}
+.ic{border-radius:14px;padding:28px;background:var(--surface);border:1px solid rgba(139,92,246,.15);transition:all .3s}
+.ic:hover{transform:translateY(-4px);border-color:var(--accent2)}
+.ii{font-size:2.2rem;margin-bottom:14px}
+.it{font-size:1rem;font-weight:700;margin-bottom:9px}
+.idesc{font-size:.85rem;color:var(--text-dim);line-height:1.7}
+footer{padding:50px 24px;text-align:center;border-top:1px solid rgba(255,255,255,.05);background:var(--surface)}
+footer .fl{font-size:1.2rem;font-weight:900;margin-bottom:14px}
+footer .fm{color:var(--text-dim);font-size:.85rem;line-height:1.9}
+footer a{color:var(--accent);text-decoration:none}
+/* lang */
+.zh{display:none}
+body.zh-mode .en{display:none}
+body.zh-mode .zh{display:block}
+body.zh-mode .zh-i{display:inline!important}
+.zh-i{display:none!important}
+body.zh-mode .en-i{display:none!important}
 </style>
 </head>
 <body>
 
-<!-- Language Toggle -->
 <div class="lang-bar">
   <button class="lang-btn active" onclick="setLang('en')" id="btn-en">EN</button>
   <button class="lang-btn" onclick="setLang('zh')" id="btn-zh">中文</button>
 </div>
 
-<!-- ════════════════════ HERO ════════════════════ -->
+<!-- HERO -->
 <section id="hero">
-  <canvas id="hero-canvas"></canvas>
+  <div class="hero-bg"></div>
   <div class="hero-content">
-    <div class="hero-badge">
-      <span class="en-inline">Cryo-EM Deep Learning Dataset</span>
-      <span class="zh-inline">冷冻电镜深度学习数据集</span>
+    <div class="hero-badge"><span class="badge-dot"></span>
+      <span class="en-i">Cryo-EM · Deep Learning · Structural Biology</span>
+      <span class="zh-i">冷冻电镜 · 深度学习 · 结构生物学</span>
     </div>
     <h1>
-      <span class="en-inline">Plan A</span>
-      <span class="zh-inline">A 计划</span>
+      <span class="l1">Plan A &nbsp;/&nbsp; A 计划</span>
+      <span class="l2 en-i">Cryo-EM Alignment Dataset</span>
+      <span class="l2 zh-i">冷冻电镜对齐数据集</span>
     </h1>
-    <p class="hero-sub en">
-      A large-scale cryo-EM map-model alignment dataset with 8-channel voxel annotations,
-      enabling next-generation deep learning for structural biology.
-    </p>
-    <p class="hero-sub zh" style="display:none">
-      大规模冷冻电镜密度图—原子模型对齐数据集，提供8通道体素标注，
-      为结构生物学深度学习研究奠定基础。
-    </p>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num">11K+</div>
-        <div class="stat-label en-inline">EMDB Entries</div>
-        <div class="stat-label zh-inline" style="display:none">EMDB 条目</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">8</div>
-        <div class="stat-label en-inline">Label Channels</div>
-        <div class="stat-label zh-inline" style="display:none">标注通道</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">1.0Å</div>
-        <div class="stat-label en-inline">Voxel Resolution</div>
-        <div class="stat-label zh-inline" style="display:none">体素分辨率</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">6°</div>
-        <div class="stat-label en-inline">Resolution Range</div>
-        <div class="stat-label zh-inline" style="display:none">分辨率范围</div>
-      </div>
+    <p class="hero-sub en">A large-scale, quality-graded cryo-EM map-model alignment dataset with 8-channel voxel annotations — built for training next-generation structural biology AI.</p>
+    <p class="hero-sub zh" style="display:none">大规模、质量分级的冷冻电镜密度图—原子模型对齐数据集，提供 8 通道体素标注，专为训练新一代结构生物学 AI 构建。</p>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-n">11K+</div><div class="stat-l en-i">PDB Entries</div><div class="stat-l zh-i">PDB 条目</div></div>
+      <div class="stat-box"><div class="stat-n">8</div><div class="stat-l en-i">Label Channels</div><div class="stat-l zh-i">标注通道</div></div>
+      <div class="stat-box"><div class="stat-n">1.0 Å</div><div class="stat-l en-i">Voxel Size</div><div class="stat-l zh-i">体素大小</div></div>
+      <div class="stat-box"><div class="stat-n">1–6 Å</div><div class="stat-l en-i">Resolution</div><div class="stat-l zh-i">分辨率范围</div></div>
     </div>
-    <div class="btn-group">
-      <a href="https://github.com/wyku/protein_labeler" class="btn btn-primary">
-        ⭐ <span class="en-inline">View on GitHub</span><span class="zh-inline" style="display:none">查看代码</span>
-      </a>
-      <a href="#pipeline" class="btn btn-outline">
-        🔬 <span class="en-inline">Explore Pipeline</span><span class="zh-inline" style="display:none">了解流水线</span>
-      </a>
-    </div>
-  </div>
-  <div class="scroll-hint">
-    <span class="en-inline">Scroll</span><span class="zh-inline" style="display:none">下滑</span>
-    <div class="scroll-arrow"></div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ════════════════════ PIPELINE ════════════════════ -->
-<section id="pipeline" style="max-width:1200px;margin:0 auto;padding:100px 20px">
-  <div class="section-label en-inline">Processing Pipeline</div>
-  <div class="section-label zh-inline" style="display:none">处理流水线</div>
-  <h2 class="en">8-Step Automated Pipeline</h2>
-  <h2 class="zh" style="display:none">全自动 8 步处理流水线</h2>
-  <p class="section-desc en">
-    From raw EMDB entries to training-ready annotated data — fully automated,
-    quality-controlled, and reproducible.
-  </p>
-  <p class="section-desc zh" style="display:none">
-    从原始 EMDB 条目到可直接用于训练的标注数据，全程自动化、质量可控、完全可复现。
-  </p>
-  <div class="pipeline-grid">
-    <div class="pipeline-card">
-      <div class="step-num">STEP 01</div>
-      <div class="step-icon">⬇️</div>
-      <div class="step-title en-inline">Retrieval</div>
-      <div class="step-title zh-inline" style="display:none">数据下载</div>
-      <div class="step-desc en">Download density maps from EMDB FTP and atomic models from RCSB PDB. Auto-fetch resolution metadata.</div>
-      <div class="step-desc zh" style="display:none">从 EMDB FTP 下载密度图，从 RCSB PDB 下载原子模型，自动获取分辨率元数据。</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="step-num">STEP 02</div>
-      <div class="step-icon">🔄</div>
-      <div class="step-title en-inline">Resampling</div>
-      <div class="step-title zh-inline" style="display:none">重采样</div>
-      <div class="step-desc en">Resample density maps to uniform 1.0 Å/voxel using scipy interpolation. Handle non-standard MRC axis orders.</div>
-      <div class="step-desc zh" style="display:none">用 scipy 插值将密度图重采样到统一 1.0 Å/voxel，正确处理非标准 MRC 轴排列。</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="step-num">STEP 03</div>
-      <div class="step-icon">📊</div>
-      <div class="step-title en-inline">Normalization</div>
-      <div class="step-title zh-inline" style="display:none">归一化</div>
-      <div class="step-desc en">98th-percentile normalization on non-zero voxels. Clips to [0, 1] for consistent training input.</div>
-      <div class="step-desc zh" style="display:none">对非零体素取第98百分位归一化，输出值域 [0,1]，保证训练输入的一致性。</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="step-num">STEP 04</div>
-      <div class="step-icon">🔬</div>
-      <div class="step-title en-inline">Alignment QC</div>
-      <div class="step-title zh-inline" style="display:none">对齐质控</div>
-      <div class="step-desc en">PHENIX map_model_cc for CC_mask/CC_volume/CC_peaks. Per-atom Q-score using Pintilie 2020 method.</div>
-      <div class="step-desc zh" style="display:none">PHENIX 计算 CC_mask/CC_volume/CC_peaks，Pintilie 2020 方法逐原子计算 Q-score 置信度。</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="step-num">STEP 05</div>
-      <div class="step-icon">🧩</div>
-      <div class="step-title en-inline">Domain Segmentation</div>
-      <div class="step-title zh-inline" style="display:none">结构域分割</div>
-      <div class="step-desc en">Merizo deep learning model segments each chain into structural domains. Propagated to bio-assembly copies.</div>
-      <div class="step-desc zh" style="display:none">Merizo 深度学习模型将每条链分割为结构域，并传播到生物组装体的所有对称副本。</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="step-num">STEP 06</div>
-      <div class="step-icon">🏷️</div>
-      <div class="step-title en-inline">Voxel Labeling</div>
-      <div class="step-title zh-inline" style="display:none">体素标注</div>
-      <div class="step-desc en">8-channel CA-only annotation paradigm. Three KDTree groups for semantic labels at atomic resolution.</div>
-      <div class="step-desc zh" style="display:none">8 通道 CA-only 标注范式，三组 KDTree 在原子分辨率下生成语义标签。</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="step-num">STEP 07</div>
-      <div class="step-icon">✨</div>
-      <div class="step-title en-inline">Simulated Density</div>
-      <div class="step-title zh-inline" style="display:none">模拟密度图</div>
-      <div class="step-desc en">ChimeraX molmap generates ideal noiseless density map from atomic model — the perfect denoising target.</div>
-      <div class="step-desc zh" style="display:none">ChimeraX molmap 从原子模型生成理想无噪声密度图，作为去噪任务的完美目标。</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="step-num">STEP 08</div>
-      <div class="step-icon">🏆</div>
-      <div class="step-title en-inline">Tier Classification</div>
-      <div class="step-title zh-inline" style="display:none">质量分级</div>
-      <div class="step-desc en">Gold / Silver / Bronze / Reject tiers based on resolution, CC_mask, and Q-score with resolution-binned thresholds.</div>
-      <div class="step-desc zh" style="display:none">按分辨率区间设阈值，依据 CC_mask 和 Q-score 分为 Gold/Silver/Bronze/Reject 四档。</div>
+    <div class="cta-row">
+      <a href="https://github.com/wyku/protein_labeler" class="btn btn-p">⭐ <span class="en-i">View Code</span><span class="zh-i">查看代码</span></a>
+      <a href="#viewer" class="btn btn-o">🔬 <span class="en-i">3D Preview</span><span class="zh-i">三维预览</span></a>
     </div>
   </div>
 </section>
-
 <div class="divider"></div>
 
-<!-- ════════════════════ 3D VISUALIZATION ════════════════════ -->
-<section id="viz-section" style="padding:100px 20px;text-align:center;background:radial-gradient(ellipse at center, rgba(0,200,255,0.04) 0%, transparent 70%)">
-  <div class="section-label en-inline">Interactive 3D Preview</div>
-  <div class="section-label zh-inline" style="display:none">交互式三维预览</div>
-  <h2 class="en">Explore the Label Channels</h2>
-  <h2 class="zh" style="display:none">探索标注通道</h2>
-  <p class="section-desc en" style="margin:0 auto 40px;text-align:center">
-    Each EMDB entry produces 8 label channels encoding structural, chemical, and functional information.
-  </p>
-  <p class="section-desc zh" style="display:none;margin:0 auto 40px;text-align:center">
-    每个 EMDB 条目生成 8 个标注通道，编码结构、化学和功能信息。
-  </p>
-  <div class="viz-controls">
-    <button class="viz-btn active" onclick="setVizMode('density')">
-      <span class="en-inline">Density Map</span><span class="zh-inline" style="display:none">密度图</span>
-    </button>
-    <button class="viz-btn" onclick="setVizMode('segment')">
-      <span class="en-inline">Segment</span><span class="zh-inline" style="display:none">蛋白质掩码</span>
-    </button>
-    <button class="viz-btn" onclick="setVizMode('ss')">
-      <span class="en-inline">Secondary Structure</span><span class="zh-inline" style="display:none">二级结构</span>
-    </button>
-    <button class="viz-btn" onclick="setVizMode('domain')">
-      <span class="en-inline">Domains</span><span class="zh-inline" style="display:none">结构域</span>
-    </button>
+<!-- GALLERY: Real EMDB images -->
+<div class="sw" id="gallery">
+  <span class="sl en-i">Processed Entries · Real Data from EMDB</span>
+  <span class="sl zh-i" style="display:none">已处理条目 · 来自 EMDB 的真实数据</span>
+  <h2 class="en">Official Cryo-EM Density Maps</h2>
+  <h2 class="zh" style="display:none">冷冻电镜密度图官方图像</h2>
+  <p class="sd en">Each image below is the official EMDB density map preview — real experimental data processed by our pipeline. Click any card to load the 3D structure.</p>
+  <p class="sd zh" style="display:none">以下每张图片均为 EMDB 官方密度图预览——经我们流水线处理的真实实验数据。点击任意卡片加载三维结构。</p>
+  <div class="emdb-grid">
+    <div class="ec" onclick="loadStr('7EFC','cartoon')">
+      <img src="https://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-31083/images/emd_31083.png" alt="EMD-31083 cryo-EM density map" loading="lazy">
+      <div class="ec-info">
+        <div class="ec-id">EMD-31083 &nbsp;·&nbsp; 7EFC</div>
+        <div class="ec-name en-i">β-barrel transporter · 4-chain tetramer</div>
+        <div class="ec-name zh-i" style="display:none">β-桶状转运蛋白 · 4链四聚体</div>
+        <div class="ec-meta">
+          <span class="tag" style="background:rgba(245,158,11,.15);color:#f59e0b">🥇 Gold</span>
+          <span class="tag" style="background:rgba(0,212,255,.1);color:#00d4ff">1.70 Å</span>
+          <span class="tag" style="background:rgba(16,185,129,.1);color:#10b981">CC=0.837</span>
+        </div>
+      </div>
+    </div>
+    <div class="ec" onclick="loadStr('7A4M','surface')">
+      <img src="https://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-11638/images/emd_11638.png" alt="EMD-11638 apoferritin" loading="lazy">
+      <div class="ec-info">
+        <div class="ec-id">EMD-11638 &nbsp;·&nbsp; 7A4M</div>
+        <div class="ec-name en-i">Apoferritin · 24-chain icosahedral assembly</div>
+        <div class="ec-name zh-i" style="display:none">脱铁铁蛋白 · 24链二十面体组装体</div>
+        <div class="ec-meta">
+          <span class="tag" style="background:rgba(245,158,11,.15);color:#f59e0b">🥇 Gold</span>
+          <span class="tag" style="background:rgba(0,212,255,.1);color:#00d4ff">1.22 Å</span>
+          <span class="tag" style="background:rgba(16,185,129,.1);color:#10b981">48 domains</span>
+        </div>
+      </div>
+    </div>
+    <div class="ec" onclick="loadStr('8XPS','cartoon')">
+      <img src="https://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-38560/images/emd_38560.png" alt="EMD-38560 glycoprotein" loading="lazy">
+      <div class="ec-info">
+        <div class="ec-id">EMD-38560 &nbsp;·&nbsp; 8XPS</div>
+        <div class="ec-name en-i">Glycoprotein complex · 7 chains</div>
+        <div class="ec-name zh-i" style="display:none">糖蛋白复合物 · 7条链</div>
+        <div class="ec-meta">
+          <span class="tag" style="background:rgba(148,163,184,.15);color:#94a3b8">🥈 Silver</span>
+          <span class="tag" style="background:rgba(0,212,255,.1);color:#00d4ff">3.22 Å</span>
+          <span class="tag" style="background:rgba(16,185,129,.1);color:#10b981">4 domains</span>
+        </div>
+      </div>
+    </div>
+    <div class="ec" onclick="loadStr('9K6S','ribbon')">
+      <img src="https://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-62134/images/emd_62134.png" alt="EMD-62134 protein-RNA" loading="lazy">
+      <div class="ec-info">
+        <div class="ec-id">EMD-62134 &nbsp;·&nbsp; 9K6S</div>
+        <div class="ec-name en-i">Protein-RNA complex · ribosome-related</div>
+        <div class="ec-name zh-i" style="display:none">蛋白质-RNA 复合物 · 核糖体相关</div>
+        <div class="ec-meta">
+          <span class="tag" style="background:rgba(180,83,9,.15);color:#b45309">🥉 Bronze</span>
+          <span class="tag" style="background:rgba(0,212,255,.1);color:#00d4ff">2.80 Å</span>
+          <span class="tag" style="background:rgba(16,185,129,.1);color:#10b981">2 domains</span>
+        </div>
+      </div>
+    </div>
   </div>
-  <div id="protein-canvas-wrap">
-    <canvas id="protein-canvas"></canvas>
+</div>
+<div class="divider"></div>
+
+<!-- REAL 3D VIEWER -->
+<div class="sw" id="viewer">
+  <span class="sl en-i">Live 3D Viewer · Real Atomic Structures from RCSB PDB</span>
+  <span class="sl zh-i" style="display:none">实时三维查看器 · 来自 RCSB PDB 的真实原子结构</span>
+  <h2 class="en">Explore the Actual Structures</h2>
+  <h2 class="zh" style="display:none">探索真实原子结构</h2>
+  <p class="sd en">Interactive viewer powered by NGL — loads actual atomic coordinates directly from RCSB PDB. Drag to rotate · scroll to zoom · switch color/style above.</p>
+  <p class="sd zh" style="display:none">NGL 驱动的交互式查看器，直接从 RCSB PDB 加载真实原子坐标。拖动旋转 · 滚轮缩放 · 切换颜色/样式。</p>
+  <div class="vw">
+    <div class="vh">
+      <span class="vht" id="vt">7EFC — β-barrel transporter (1.70 Å · Gold)</span>
+      <span class="vhb">NGL Viewer · Live RCSB PDB</span>
+    </div>
+    <div id="ngl-vp"></div>
+    <div class="vcs">
+      <button class="vcb active" onclick="setR('cartoon')"><span class="en-i">Cartoon</span><span class="zh-i" style="display:none">卡通</span></button>
+      <button class="vcb" onclick="setR('surface')"><span class="en-i">Surface</span><span class="zh-i" style="display:none">表面</span></button>
+      <button class="vcb" onclick="setR('ball+stick')"><span class="en-i">Ball+Stick</span><span class="zh-i" style="display:none">球棍</span></button>
+      <button class="vcb" onclick="setR('spacefill')"><span class="en-i">Space Fill</span><span class="zh-i" style="display:none">空间填充</span></button>
+      <button class="vcb" onclick="setC('chainname')"><span class="en-i">🎨 Chain</span><span class="zh-i" style="display:none">🎨 链</span></button>
+      <button class="vcb" onclick="setC('sstruc')"><span class="en-i">🔴 Sec. Struct</span><span class="zh-i" style="display:none">🔴 二级结构</span></button>
+      <button class="vcb" onclick="setC('bfactor')"><span class="en-i">🌡 B-factor</span><span class="zh-i" style="display:none">🌡 B因子</span></button>
+    </div>
   </div>
-  <div class="viz-legend" id="viz-legend"></div>
-</section>
-
+</div>
 <div class="divider"></div>
 
-<!-- ════════════════════ LABEL CHANNELS ════════════════════ -->
-<section style="max-width:1200px;margin:0 auto;padding:100px 20px" class="labels-section">
-  <div class="section-label en-inline">8-Channel Labels</div>
-  <div class="section-label zh-inline" style="display:none">8 通道标注</div>
-  <h2 class="en">Rich Semantic Annotation</h2>
-  <h2 class="zh" style="display:none">丰富的语义标注</h2>
-  <p class="section-desc en">
-    The CA-only paradigm places semantic labels at alpha-carbon positions,
-    reducing noise while preserving structural information across 8 channels.
-  </p>
-  <p class="section-desc zh" style="display:none">
-    CA-only 标注范式在 α-碳位置放置语义标签，在保留结构信息的同时降低噪声，覆盖 8 个通道。
-  </p>
-  <div class="labels-grid" id="labels-grid"></div>
-</section>
-
+<!-- LABEL CHANNELS -->
+<div class="sw" id="labels">
+  <span class="sl en-i">8-Channel Voxel Annotations</span>
+  <span class="sl zh-i" style="display:none">8 通道体素标注</span>
+  <h2 class="en">Rich Semantic Labels at Atomic Resolution</h2>
+  <h2 class="zh" style="display:none">原子分辨率的丰富语义标注</h2>
+  <p class="sd en">CA-only paradigm: semantic labels placed at alpha-carbon positions, reducing voxel noise while preserving all structural information across 8 channels.</p>
+  <p class="sd zh" style="display:none">CA-only 范式：语义标签放置在 α-碳位置，在保留全部结构信息的同时降低体素噪声，覆盖 8 个通道。</p>
+  <div class="lg" id="lg"></div>
+</div>
 <div class="divider"></div>
 
-<!-- ════════════════════ QUALITY TIERS ════════════════════ -->
-<section style="max-width:1200px;margin:0 auto;padding:100px 20px">
-  <div class="section-label en-inline">Data Quality System</div>
-  <div class="section-label zh-inline" style="display:none">数据质量体系</div>
+<!-- PIPELINE -->
+<div class="sw" id="pipeline">
+  <span class="sl en-i">Automated Processing Pipeline</span>
+  <span class="sl zh-i" style="display:none">自动化处理流水线</span>
+  <h2 class="en">8 Steps: Raw EMDB → Training-Ready Labels</h2>
+  <h2 class="zh" style="display:none">8 步：原始 EMDB → 可训练标注</h2>
+  <div class="pg" id="pg"></div>
+</div>
+<div class="divider"></div>
+
+<!-- TIERS -->
+<div class="sw">
+  <span class="sl en-i">Quality System</span>
+  <span class="sl zh-i" style="display:none">质量体系</span>
   <h2 class="en">Resolution-Binned Quality Tiers</h2>
   <h2 class="zh" style="display:none">分辨率分档质量评级</h2>
-  <p class="section-desc en">
-    Each entry is classified by combining CC_mask (PHENIX), Q-score density fit confidence,
-    and resolution — enabling downstream tasks to select data by quality.
-  </p>
-  <p class="section-desc zh" style="display:none">
-    每个条目综合 CC_mask（PHENIX）、Q-score 密度拟合置信度和分辨率进行分级，
-    下游任务可按质量筛选数据。
-  </p>
-  <div class="tier-grid">
-    <div class="tier-card gold">
-      <div class="tier-icon">🥇</div>
-      <div class="tier-name gold en-inline">Gold</div>
-      <div class="tier-name gold zh-inline" style="display:none">金</div>
-      <div class="tier-criteria">
-        <span class="en-inline">1.0–2.5Å &nbsp;·&nbsp; CC_mask ≥ 0.75 &nbsp;·&nbsp; Q-score ≥ 0.65<br>Highest confidence for model training</span>
-        <span class="zh-inline" style="display:none">1.0–2.5Å &nbsp;·&nbsp; CC_mask ≥ 0.75 &nbsp;·&nbsp; Q-score ≥ 0.65<br>最高置信度，最适合模型训练</span>
-      </div>
-    </div>
-    <div class="tier-card silver">
-      <div class="tier-icon">🥈</div>
-      <div class="tier-name silver en-inline">Silver</div>
-      <div class="tier-name silver zh-inline" style="display:none">银</div>
-      <div class="tier-criteria">
-        <span class="en-inline">Multi-band resolution &nbsp;·&nbsp; CC_mask ≥ 0.65–0.70<br>Reliable data for pre-training</span>
-        <span class="zh-inline" style="display:none">多分辨率区间 &nbsp;·&nbsp; CC_mask ≥ 0.65–0.70<br>可靠数据，适合预训练</span>
-      </div>
-    </div>
-    <div class="tier-card bronze">
-      <div class="tier-icon">🥉</div>
-      <div class="tier-name bronze en-inline">Bronze</div>
-      <div class="tier-name bronze zh-inline" style="display:none">铜</div>
-      <div class="tier-criteria">
-        <span class="en-inline">Up to 6.0Å &nbsp;·&nbsp; Moderate CC & Q-score<br>Suitable for low-resolution tasks</span>
-        <span class="zh-inline" style="display:none">最高 6.0Å &nbsp;·&nbsp; 中等 CC 和 Q-score<br>适用于低分辨率任务</span>
-      </div>
-    </div>
-    <div class="tier-card reject">
-      <div class="tier-icon">⛔</div>
-      <div class="tier-name" style="color:#ff6b6b" class="en-inline">Reject</div>
-      <div class="tier-name zh-inline" style="display:none;color:#ff6b6b">拒绝</div>
-      <div class="tier-criteria">
-        <span class="en-inline">&gt;6Å or CC_mask &lt;0.40 or Q&lt;0.15<br>Filtered out automatically</span>
-        <span class="zh-inline" style="display:none">&gt;6Å 或 CC_mask &lt;0.40 或 Q&lt;0.15<br>自动过滤排除</span>
-      </div>
-    </div>
+  <p class="sd en">PHENIX CC_mask + Q-score + resolution → four quality tiers. Enables curriculum learning and task-specific data selection.</p>
+  <p class="sd zh" style="display:none">PHENIX CC_mask + Q-score + 分辨率 → 四档质量，支持课程学习和特定任务数据筛选。</p>
+  <div class="tg">
+    <div class="tc gold"><div class="ti">🥇</div><div class="tn">Gold</div><div class="ts">1.0–2.5 Å<br>CC_mask ≥ 0.75<br>Q-score ≥ 0.65</div></div>
+    <div class="tc silver"><div class="ti">🥈</div><div class="tn">Silver</div><div class="ts">Multi-band<br>CC_mask ≥ 0.65<br>Q-score ≥ 0.50</div></div>
+    <div class="tc bronze"><div class="ti">🥉</div><div class="tn">Bronze</div><div class="ts">Up to 6.0 Å<br>Moderate CC<br>Moderate Q</div></div>
+    <div class="tc reject"><div class="ti">⛔</div><div class="tn">Reject</div><div class="ts">&gt;6 Å, or<br>CC &lt;0.40, or<br>Q &lt;0.15</div></div>
   </div>
-</section>
-
+</div>
 <div class="divider"></div>
 
-<!-- ════════════════════ IMPACT ════════════════════ -->
-<section style="max-width:1200px;margin:0 auto;padding:100px 20px">
-  <div class="section-label en-inline">Scientific Impact</div>
-  <div class="section-label zh-inline" style="display:none">科学价值</div>
-  <h2 class="en">Enabling Next-Generation Research</h2>
-  <h2 class="zh" style="display:none">赋能下一代研究</h2>
-  <p class="section-desc en">
-    This dataset serves as the foundation for a new class of deep learning models
-    targeting cryo-EM structural biology.
-  </p>
-  <p class="section-desc zh" style="display:none">
-    该数据集是新一代深度学习模型的基础，专为冷冻电镜结构生物学设计。
-  </p>
-  <div class="impact-grid">
-    <div class="impact-card">
-      <div class="impact-icon">🎯</div>
-      <div class="impact-title en-inline">Map-Model Alignment</div>
-      <div class="impact-title zh-inline" style="display:none">密度图—模型对齐</div>
-      <div class="impact-desc en">8-channel voxel annotations enable end-to-end supervised learning for automatic map-model fitting — the primary dataset objective.</div>
-      <div class="impact-desc zh" style="display:none">8 通道体素标注使端到端监督学习自动密度图—模型拟合成为可能，这是本数据集的核心目标。</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-icon">🔇</div>
-      <div class="impact-title en-inline">Denoising & Enhancement</div>
-      <div class="impact-title zh-inline" style="display:none">去噪与增强</div>
-      <div class="impact-desc en">Paired experimental and ChimeraX simulated density maps provide ground truth for map denoising and resolution enhancement models.</div>
-      <div class="impact-desc zh" style="display:none">配对的实验密度图与 ChimeraX 模拟密度图，为密度图去噪和分辨率增强模型提供真值。</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-icon">🧬</div>
-      <div class="impact-title en-inline">Protein Interface Prediction</div>
-      <div class="impact-title zh-inline" style="display:none">蛋白质界面预测</div>
-      <div class="impact-desc en">Interface labels derived from CA-CA distance thresholding enable training of interface-aware models directly from density data.</div>
-      <div class="impact-desc zh" style="display:none">基于 CA-CA 距离阈值的界面标注，支持直接从密度图数据训练界面感知模型。</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-icon">🏗️</div>
-      <div class="impact-title en-inline">Domain Architecture Learning</div>
-      <div class="impact-title zh-inline" style="display:none">结构域架构学习</div>
-      <div class="impact-desc en">Merizo-derived domain labels propagated across bio-assemblies enable density-based domain segmentation without atomic models.</div>
-      <div class="impact-desc zh" style="display:none">Merizo 生成并传播到生物组装体的结构域标注，支持无需原子模型的密度图结构域分割。</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-icon">⚖️</div>
-      <div class="impact-title en-inline">Quality-Aware Training</div>
-      <div class="impact-title zh-inline" style="display:none">质量感知训练</div>
-      <div class="impact-desc en">Gold/Silver/Bronze tiers with PHENIX CC metrics allow curriculum learning — start with high-quality data, gradually add harder examples.</div>
-      <div class="impact-desc zh" style="display:none">PHENIX CC 指标支撑的 Gold/Silver/Bronze 分级，支持课程学习：从高质量数据开始，逐步加入难例。</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-icon">📐</div>
-      <div class="impact-title en-inline">Secondary Structure in Density</div>
-      <div class="impact-title zh-inline" style="display:none">密度中的二级结构</div>
-      <div class="impact-desc en">Helix/Strand/Coil labels at CA positions enable density-based secondary structure prediction — bridging cryo-EM and NLP-style SSP.</div>
-      <div class="impact-desc zh" style="display:none">CA 位置的螺旋/折叠/无规则卷曲标注，使基于密度图的二级结构预测成为可能。</div>
-    </div>
+<!-- IMPACT -->
+<div class="sw">
+  <span class="sl en-i">Scientific Impact</span>
+  <span class="sl zh-i" style="display:none">科学价值</span>
+  <h2 class="en">Enabling Next-Generation Cryo-EM AI</h2>
+  <h2 class="zh" style="display:none">赋能下一代冷冻电镜 AI</h2>
+  <div class="ig">
+    <div class="ic"><div class="ii">🎯</div><div class="it en-i">Map-Model Alignment</div><div class="it zh-i" style="display:none">密度图—模型对齐</div><div class="idesc en">End-to-end supervised learning for automatic fitting of atomic models into cryo-EM density maps.</div><div class="idesc zh" style="display:none">端到端监督学习，自动将原子模型拟合进冷冻电镜密度图。</div></div>
+    <div class="ic"><div class="ii">🔇</div><div class="it en-i">Map Denoising</div><div class="it zh-i" style="display:none">密度图去噪</div><div class="idesc en">Experimental + ChimeraX-simulated map pairs as perfect denoising / super-resolution targets.</div><div class="idesc zh" style="display:none">实验图与 ChimeraX 模拟图配对，作为完美的去噪/超分辨率目标。</div></div>
+    <div class="ic"><div class="ii">🧬</div><div class="it en-i">Interface Prediction</div><div class="it zh-i" style="display:none">界面预测</div><div class="idesc en">CA-CA distance-based interface labels enable density-based protein interaction models.</div><div class="idesc zh" style="display:none">CA-CA 距离界面标注，支持基于密度的蛋白质相互作用模型。</div></div>
+    <div class="ic"><div class="ii">🏗️</div><div class="it en-i">Domain Segmentation</div><div class="it zh-i" style="display:none">结构域分割</div><div class="idesc en">Merizo domain labels across full bio-assemblies for density-only domain boundary prediction.</div><div class="idesc zh" style="display:none">覆盖完整生物组装体的 Merizo 结构域标注，支持纯密度结构域边界预测。</div></div>
+    <div class="ic"><div class="ii">⚖️</div><div class="it en-i">Curriculum Learning</div><div class="it zh-i" style="display:none">课程学习</div><div class="idesc en">Gold→Silver→Bronze progression enables structured training from easy high-quality to harder examples.</div><div class="idesc zh" style="display:none">Gold→Silver→Bronze 分级支持从高质量简单样本到难例的结构化训练。</div></div>
+    <div class="ic"><div class="ii">📐</div><div class="it en-i">Secondary Structure in Density</div><div class="it zh-i" style="display:none">密度中的二级结构</div><div class="idesc en">Helix/Strand/Coil at CA positions — bridging cryo-EM density and sequence-based SSP models.</div><div class="idesc zh" style="display:none">CA 位置螺旋/折叠/无规则卷曲，连接冷冻电镜密度与序列二级结构预测模型。</div></div>
   </div>
-</section>
+</div>
 
-<div class="divider"></div>
-
-<!-- ════════════════════ FOOTER ════════════════════ -->
 <footer>
-  <div style="margin-bottom:16px;font-size:1.1rem;font-weight:700;color:var(--text)">Plan A &nbsp;/&nbsp; A 计划</div>
-  <div style="margin-bottom:12px">
-    <span class="en-inline">Built with PHENIX · ChimeraX · Merizo · gemmi · mrcfile</span>
-    <span class="zh-inline" style="display:none">基于 PHENIX · ChimeraX · Merizo · gemmi · mrcfile 构建</span>
-  </div>
-  <div>
-    <a href="https://github.com/wyku/protein_labeler">GitHub</a>
-    &nbsp;·&nbsp;
-    <span class="en-inline">Data from <a href="https://www.ebi.ac.uk/emdb/">EMDB</a> &amp; <a href="https://www.rcsb.org/">RCSB PDB</a></span>
-    <span class="zh-inline" style="display:none">数据来源：<a href="https://www.ebi.ac.uk/emdb/">EMDB</a> 和 <a href="https://www.rcsb.org/">RCSB PDB</a></span>
+  <div class="fl">Plan A &nbsp;/&nbsp; A 计划</div>
+  <div class="fm">
+    Built with <strong>PHENIX</strong> · <strong>ChimeraX</strong> · <strong>Merizo</strong> · <strong>gemmi</strong> · <strong>mrcfile</strong><br>
+    Data from <a href="https://www.ebi.ac.uk/emdb/">EMDB</a> &amp; <a href="https://www.rcsb.org/">RCSB PDB</a>
+    &nbsp;·&nbsp; <a href="https://github.com/wyku/protein_labeler">GitHub</a>
   </div>
 </footer>
 
 <script>
-// ══════════════════════════════════════════════
-// Language Toggle
-// ══════════════════════════════════════════════
-function setLang(lang) {
-  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
-  document.body.classList.toggle('zh-mode', lang === 'zh');
-  // toggle inline spans
-  document.querySelectorAll('.zh-inline').forEach(el => el.style.display = lang === 'zh' ? 'inline' : 'none');
-  document.querySelectorAll('.en-inline').forEach(el => el.style.display = lang === 'en' ? 'inline' : 'none');
-  document.querySelectorAll('.zh').forEach(el => el.style.display = lang === 'zh' ? 'block' : 'none');
-  document.querySelectorAll('.en').forEach(el => el.style.display = lang === 'en' ? 'block' : 'none');
+// Language
+function setLang(l){
+  ['en','zh'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===l));
+  document.body.classList.toggle('zh-mode',l==='zh');
+  document.querySelectorAll('.zh-i').forEach(e=>e.style.display=l==='zh'?'inline':'none');
+  document.querySelectorAll('.en-i').forEach(e=>e.style.display=l==='en'?'inline':'none');
+  document.querySelectorAll('.zh').forEach(e=>e.style.display=l==='zh'?'block':'none');
+  document.querySelectorAll('.en').forEach(e=>e.style.display=l==='en'?'block':'none');
 }
 
-// ══════════════════════════════════════════════
-// Hero Canvas — Particle Field
-// ══════════════════════════════════════════════
-(function() {
-  const canvas = document.getElementById('hero-canvas');
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [], connections = [];
-  const NUM = 80;
+// NGL Viewer
+let stage,comp,rep='cartoon',col='chainname';
+const TITLES={'7EFC':'7EFC — β-barrel transporter (1.70 Å · Gold ✓)','7A4M':'7A4M — Apoferritin 24-mer (1.22 Å · Gold ✓)','8XPS':'8XPS — Glycoprotein complex (3.22 Å · Silver ✓)','9K6S':'9K6S — Protein-RNA complex (2.80 Å · Bronze ✓)'};
+window.addEventListener('load',()=>{
+  stage=new NGL.Stage('ngl-vp',{backgroundColor:'#0a1220',quality:'medium',ambientIntensity:.4,lightIntensity:.9});
+  loadStr('7EFC','cartoon');
+  window.addEventListener('resize',()=>stage.handleResize());
+});
+window.loadStr=function(id,r){
+  rep=r||rep; document.getElementById('vt').textContent=TITLES[id]||id;
+  if(comp){stage.removeComponent(comp);comp=null;}
+  stage.loadFile('rcsb://'+id,{defaultRepresentation:false}).then(c=>{
+    comp=c; applyRep(c,rep,col); c.autoView(); stage.setSpin([0,1,0],.004);
+  }).catch(e=>console.warn(e));
+};
+function applyRep(c,r,co){
+  if(!c)return; c.removeAllRepresentations();
+  const CHAIN=[0x00d4ff,0x8b5cf6,0x10b981,0xf59e0b,0xef4444,0xec4899,0x06b6d4,0xa78bfa];
+  const sc=NGL.ColormakerRegistry.addScheme(function(){
+    this.atomColor=function(a){
+      if(co==='chainname') return CHAIN[a.chainIndex%CHAIN.length];
+      if(co==='sstruc'){if(a.sstruc==='h')return 0xef4444;if(a.sstruc==='s')return 0x00d4ff;return 0x8b5cf6;}
+      if(co==='bfactor'){const v=Math.min(1,a.bfactor/100);return((Math.floor(v*255))<<16)|(0<<8)|Math.floor((1-v)*255);}
+      return 0x00d4ff;
+    };
+  });
+  c.addRepresentation(r,{colorScheme:sc,roughness:.5,metalness:.1});
+}
+window.setR=function(r){rep=r;document.querySelectorAll('.vcb').forEach((b,i)=>b.classList.toggle('active',i===['cartoon','surface','ball+stick','spacefill','chainname','sstruc','bfactor'].indexOf(r)));if(comp)applyRep(comp,r,col);};
+window.setC=function(c){col=c;if(comp)applyRep(comp,rep,c);};
 
-  function resize() {
-    W = canvas.width = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  for (let i = 0; i < NUM; i++) {
-    particles.push({
-      x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
-      r: Math.random() * 2.5 + 1,
-      color: Math.random() < 0.4 ? '#00c8ff' : Math.random() < 0.7 ? '#7b61ff' : '#00ff9d',
-      pulse: Math.random() * Math.PI * 2
-    });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    const t = Date.now() * 0.001;
-
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy; p.pulse += 0.02;
-      if (p.x < 0 || p.x > W) p.vx *= -1;
-      if (p.y < 0 || p.y > H) p.vy *= -1;
-      const alpha = 0.4 + 0.3 * Math.sin(p.pulse);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r + Math.sin(p.pulse) * 0.5, 0, Math.PI * 2);
-      ctx.fillStyle = p.color + Math.floor(alpha * 255).toString(16).padStart(2,'0');
-      ctx.fill();
-    });
-
-    // Draw connections
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 100) {
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = `rgba(0,200,255,${0.15 * (1 - dist/100)})`;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-// ══════════════════════════════════════════════
 // Label Cards
-// ══════════════════════════════════════════════
-const labels = [
-  { name: 'Segment', nameZh: '蛋白质掩码', desc: 'Protein mask (0/1)', descZh: '蛋白质/背景掩码（0/1）',
-    colors: ['#00c8ff','#0a1628'], badge: 'Binary', badgeColor: '#00c8ff22' },
-  { name: 'Atom Type', nameZh: '原子类型', desc: 'CA=1, C=2, N=3, O=4, CB=5', descZh: 'CA=1, C=2, N=3, O=4, CB=5',
-    colors: ['#ff6b6b','#ffd700','#00ff9d','#7b61ff','#ff9500'], badge: '5 types', badgeColor: '#ffd70022' },
-  { name: 'Amino Acid', nameZh: '氨基酸类型', desc: '20 standard residue types at CA', descZh: 'CA 位置 20 种标准氨基酸',
-    colors: ['#ff6b6b','#ff9500','#ffd700','#00ff9d','#00c8ff','#7b61ff','#ff61c7','#61ffb0'],
-    badge: '20 types', badgeColor: '#ff9d0022' },
-  { name: 'Sec. Structure', nameZh: '二级结构', desc: 'Helix·Strand·Coil at CA', descZh: 'CA 位置螺旋/折叠/无规则卷曲',
-    colors: ['#ff6b6b','#00c8ff','#7b61ff'], badge: '3 types', badgeColor: '#ff6b6b22' },
-  { name: 'Q-Score', nameZh: 'Q-score', desc: 'Atom-level density fit confidence', descZh: '原子级密度拟合置信度（Pintilie 2020）',
-    colors: ['#0a1628','#003355','#006699','#00ccff','#ffffff'], badge: 'Float', badgeColor: '#00ccff22' },
-  { name: 'Chain ID', nameZh: '链编号', desc: 'Chain identity (1–N)', descZh: '链编号（1–N）',
-    colors: ['#ff6b6b','#7b61ff','#00ff9d','#ffd700','#ff9500','#00c8ff'],
-    badge: 'N chains', badgeColor: '#7b61ff22' },
-  { name: 'Domain', nameZh: '结构域', desc: 'Structural domain ID (Merizo)', descZh: '结构域编号（Merizo）',
-    colors: ['#ff6b6b','#00ff9d','#ffd700','#7b61ff','#ff9500','#00c8ff','#ff61c7'],
-    badge: 'M domains', badgeColor: '#00ff9d22' },
-  { name: 'Interface', nameZh: '界面', desc: 'Protein-protein interface residues', descZh: '蛋白质—蛋白质界面残基（0/1）',
-    colors: ['#0a1628','#ff9500'], badge: 'Binary', badgeColor: '#ff950022' }
+const LABS=[
+  {n:'Segment',nz:'蛋白质掩码',d:'Binary protein/background mask. Foundation for all other labels.',dz:'二值蛋白质/背景掩码，所有其他标注的基础。',grad:'linear-gradient(135deg,#001829,#003355,#00d4ff)',chip:'Binary 0/1',cc:'#00d4ff'},
+  {n:'Atom Type',nz:'原子类型',d:'CA=1 C=2 N=3 O=4 CB=5 at each voxel. Guides atomic model building.',dz:'每体素 CA/C/N/O/CB 原子类型，指导原子级模型构建。',grad:'linear-gradient(135deg,#f59e0b,#ef4444,#00d4ff,#10b981,#8b5cf6)',chip:'5 classes',cc:'#f59e0b'},
+  {n:'Amino Acid',nz:'氨基酸类型',d:'20 standard residue types at CA positions. Sequence-free residue identity.',dz:'CA 位置 20 种标准氨基酸，无需序列即可推断残基身份。',grad:'linear-gradient(135deg,#ff6b6b,#ffd700,#00ff9d,#00c8ff,#8b5cf6,#ff61c7)',chip:'20 classes',cc:'#8b5cf6'},
+  {n:'Sec. Structure',nz:'二级结构',d:'Helix (red) · Strand (blue) · Coil (purple) at CA positions.',dz:'CA 位置 α-螺旋(红)·β-折叠(蓝)·无规则卷曲(紫)。',grad:'linear-gradient(to right,#ef4444 33%,#00d4ff 33% 66%,#8b5cf6 66%)',chip:'3 classes',cc:'#ef4444'},
+  {n:'Q-Score',nz:'Q-score',d:'Per-atom density fit confidence (Pintilie 2020). High = well-resolved.',dz:'逐原子密度拟合置信度（Pintilie 2020），高值代表原子分辨清晰。',grad:'linear-gradient(to right,#030810,#003,#006699,#00d4ff,#fff)',chip:'Float [0,1]',cc:'#10b981'},
+  {n:'Chain ID',nz:'链编号',d:'Chain identity for each residue. Critical for oligomeric assemblies.',dz:'每残基链编号，对寡聚体和对称组装体至关重要。',grad:'linear-gradient(135deg,#ef4444,#f59e0b,#10b981,#00d4ff,#8b5cf6,#ec4899)',chip:'N chains',cc:'#00d4ff'},
+  {n:'Domain',nz:'结构域',d:'Structural domain IDs from Merizo, propagated across assembly copies.',dz:'Merizo 结构域 ID，传播到生物组装体所有副本。',grad:'linear-gradient(135deg,#ef4444,#10b981,#f59e0b,#8b5cf6,#00d4ff,#ec4899,#a78bfa)',chip:'M domains',cc:'#10b981'},
+  {n:'Interface',nz:'界面',d:'Protein-protein interface residues (cross-chain CA-CA < 5 Å).',dz:'蛋白质-蛋白质界面残基（跨链 CA-CA < 5 Å）。',grad:'linear-gradient(to right,#030810 40%,#f59e0b)',chip:'Binary 0/1',cc:'#f59e0b'}
 ];
-
-const grid = document.getElementById('labels-grid');
-const isZh = () => document.body.classList.contains('zh-mode');
-
-labels.forEach((lb, i) => {
-  const card = document.createElement('div');
-  card.className = 'label-card';
-  card.style.background = `linear-gradient(135deg, ${lb.colors[0]}18, ${(lb.colors[lb.colors.length-1])}08)`;
-
-  // mini gradient bar
-  const vizDiv = document.createElement('div');
-  vizDiv.className = 'label-viz';
-  vizDiv.style.background = `linear-gradient(to right, ${lb.colors.join(',')})`;
-
-  card.innerHTML = `
-    <div class="label-name">${lb.name} / ${lb.nameZh}</div>
-    <div class="label-desc">${lb.desc}</div>
-    <div class="label-desc" style="font-size:0.78rem;color:#7a93b4;margin-top:4px">${lb.descZh}</div>
-    <span class="label-badge" style="background:${lb.badgeColor};color:${lb.colors[0]}">${lb.badge}</span>
-  `;
-  card.insertBefore(vizDiv, card.firstChild);
-  grid.appendChild(card);
+const lg=document.getElementById('lg');
+LABS.forEach(lb=>{
+  const d=document.createElement('div');d.className='lc';
+  const h=document.createElement('div');h.className='lih';
+  const cv=document.createElement('canvas');cv.width=210;cv.height=120;
+  const ct=cv.getContext('2d');
+  const gr=ct.createLinearGradient(0,0,210,0);
+  const hex=lb.grad.match(/#[0-9a-f]+/gi)||['#001829','#00d4ff'];
+  hex.forEach((c,i)=>gr.addColorStop(i/(hex.length-1||1),c));
+  ct.fillStyle=gr;ct.fillRect(0,0,210,120);
+  for(let i=0;i<50;i++){ct.beginPath();ct.arc(Math.random()*210,Math.random()*120,Math.random()*2.5+.5,0,Math.PI*2);ct.fillStyle='rgba(255,255,255,'+(Math.random()*.25)+')';ct.fill();}
+  // Simulate voxel grid
+  for(let x=0;x<210;x+=10)for(let y=0;y<120;y+=10){if(Math.random()>.7){ct.fillStyle='rgba(255,255,255,'+(Math.random()*.1)+')';ct.fillRect(x,y,9,9);}}
+  h.appendChild(cv);
+  const ov=document.createElement('div');ov.className='lov';
+  h.appendChild(ov);
+  d.innerHTML=`<div class="lb"><div class="ln">${lb.n} <span style="color:var(--text-dim);font-weight:400">/</span> ${lb.nz}</div><div class="ld en">${lb.d}</div><div class="ld zh" style="display:none">${lb.dz}</div><span class="lchip" style="background:${lb.cc}22;color:${lb.cc}">${lb.chip}</span></div>`;
+  d.insertBefore(h,d.firstChild);
+  lg.appendChild(d);
 });
 
-// ══════════════════════════════════════════════
-// 3D Protein Visualization with Three.js
-// ══════════════════════════════════════════════
-(function() {
-  const wrap = document.getElementById('protein-canvas-wrap');
-  const renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById('protein-canvas'),
-    antialias: true, alpha: true
-  });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-  renderer.setClearColor(0x0d1626, 1);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, wrap.clientWidth / wrap.clientHeight, 0.1, 1000);
-  camera.position.set(0, 0, 35);
-
-  // Lighting
-  scene.add(new THREE.AmbientLight(0x334466, 0.8));
-  const dir = new THREE.DirectionalLight(0x00c8ff, 1.2);
-  dir.position.set(20, 30, 20);
-  scene.add(dir);
-  const dir2 = new THREE.DirectionalLight(0x7b61ff, 0.6);
-  dir2.position.set(-20, -10, -10);
-  scene.add(dir2);
-
-  // Generate a helix-like protein backbone
-  const modes = {
-    density: { title: 'Experimental Density Map', titleZh: '实验密度图', legend: [{c:'#00c8ff',l:'High Density'},{c:'#003355',l:'Low Density'}] },
-    segment: { title: 'Protein Segment Mask', titleZh: '蛋白质掩码', legend: [{c:'#00c8ff',l:'Protein (1)'},{c:'#0d1626',l:'Background (0)'}] },
-    ss:      { title: 'Secondary Structure', titleZh: '二级结构', legend: [{c:'#ff6b6b',l:'Helix'},{c:'#00c8ff',l:'Strand'},{c:'#7b61ff',l:'Coil'}] },
-    domain:  { title: 'Domain Segmentation', titleZh: '结构域分割', legend: [{c:'#ff6b6b',l:'Domain 1'},{c:'#00ff9d',l:'Domain 2'},{c:'#ffd700',l:'Domain 3'},{c:'#7b61ff',l:'Domain 4'}] }
-  };
-
-  let currentMode = 'density';
-  let spheres = [];
-  let group = new THREE.Group();
-  scene.add(group);
-
-  const DOMAIN_COLORS = [0xff6b6b, 0x00ff9d, 0xffd700, 0x7b61ff, 0xff9500, 0x00c8ff];
-  const SS_COLORS = { helix: 0xff6b6b, strand: 0x00c8ff, coil: 0x7b61ff };
-
-  // Create protein chain points
-  function buildChain() {
-    const points = [];
-    const N = 120;
-    for (let i = 0; i < N; i++) {
-      const t = (i / N) * Math.PI * 6;
-      const x = Math.cos(t) * (8 + Math.sin(t * 0.5) * 3);
-      const y = (i / N) * 20 - 10 + Math.sin(t * 1.3) * 2;
-      const z = Math.sin(t) * (8 + Math.cos(t * 0.3) * 2);
-      const domain = Math.floor(i / 30) % DOMAIN_COLORS.length;
-      const ss = i < 25 ? 'helix' : i < 50 ? 'strand' : i < 80 ? 'helix' : i < 100 ? 'coil' : 'strand';
-      const density = 0.4 + 0.6 * Math.pow(Math.sin(t * 0.7 + 1), 2);
-      points.push({ x, y, z, domain, ss, density, i });
-    }
-    return points;
-  }
-
-  const chainPoints = buildChain();
-
-  function getColor(mode, p) {
-    if (mode === 'density') {
-      const v = p.density;
-      return new THREE.Color(0, v * 0.8, v);
-    } else if (mode === 'segment') {
-      return new THREE.Color(0x00c8ff);
-    } else if (mode === 'ss') {
-      return new THREE.Color(SS_COLORS[p.ss]);
-    } else if (mode === 'domain') {
-      return new THREE.Color(DOMAIN_COLORS[p.domain % DOMAIN_COLORS.length]);
-    }
-    return new THREE.Color(0x00c8ff);
-  }
-
-  function buildSpheres(mode) {
-    while (group.children.length) group.remove(group.children[0]);
-    spheres = [];
-
-    // Backbone tube
-    const tubePoints = chainPoints.map(p => new THREE.Vector3(p.x, p.y, p.z));
-    const curve = new THREE.CatmullRomCurve3(tubePoints);
-    const tubeGeo = new THREE.TubeGeometry(curve, 200, 0.2, 8, false);
-    const tubeMat = new THREE.MeshLambertMaterial({ color: 0x334466, transparent: true, opacity: 0.4 });
-    group.add(new THREE.Mesh(tubeGeo, tubeMat));
-
-    // CA spheres
-    chainPoints.forEach(p => {
-      const geo = new THREE.SphereGeometry(mode === 'density' ? 0.3 + p.density * 0.4 : 0.5, 8, 8);
-      const col = getColor(mode, p);
-      const mat = new THREE.MeshLambertMaterial({ color: col });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(p.x, p.y, p.z);
-      group.add(mesh);
-      spheres.push({ mesh, p, col });
-    });
-
-    // Density cloud for density mode
-    if (mode === 'density') {
-      for (let i = 0; i < 300; i++) {
-        const pi = Math.floor(Math.random() * chainPoints.length);
-        const base = chainPoints[pi];
-        const geo = new THREE.SphereGeometry(0.15 + Math.random() * 0.2, 4, 4);
-        const alpha = base.density * 0.3;
-        const mat = new THREE.MeshLambertMaterial({
-          color: new THREE.Color(0, base.density * 0.6, base.density),
-          transparent: true, opacity: alpha
-        });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(
-          base.x + (Math.random()-0.5)*3,
-          base.y + (Math.random()-0.5)*3,
-          base.z + (Math.random()-0.5)*3
-        );
-        group.add(mesh);
-      }
-    }
-
-    updateLegend(mode);
-  }
-
-  function updateLegend(mode) {
-    const legendEl = document.getElementById('viz-legend');
-    const m = modes[mode];
-    legendEl.innerHTML = m.legend.map(l =>
-      `<div class="legend-item"><div class="legend-dot" style="background:${l.c}"></div>${l.l}</div>`
-    ).join('');
-  }
-
-  buildSpheres(currentMode);
-
-  // Interaction
-  let isDragging = false, prevMouse = {x:0,y:0};
-  wrap.addEventListener('mousedown', e => { isDragging = true; prevMouse = {x:e.clientX,y:e.clientY}; });
-  window.addEventListener('mousemove', e => {
-    if (!isDragging) return;
-    const dx = e.clientX - prevMouse.x;
-    const dy = e.clientY - prevMouse.y;
-    group.rotation.y += dx * 0.008;
-    group.rotation.x += dy * 0.008;
-    prevMouse = {x:e.clientX, y:e.clientY};
-  });
-  window.addEventListener('mouseup', () => isDragging = false);
-  wrap.addEventListener('wheel', e => {
-    camera.position.z = Math.max(15, Math.min(60, camera.position.z + e.deltaY * 0.05));
-  });
-
-  window.setVizMode = function(mode) {
-    currentMode = mode;
-    document.querySelectorAll('.viz-btn').forEach((b,i) => {
-      b.classList.toggle('active', ['density','segment','ss','domain'][i] === mode);
-    });
-    buildSpheres(mode);
-  };
-
-  let t = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    if (!isDragging) group.rotation.y += 0.003;
-    t += 0.01;
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window.addEventListener('resize', () => {
-    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-    camera.aspect = wrap.clientWidth / wrap.clientHeight;
-    camera.updateProjectionMatrix();
-  });
-})();
+// Pipeline
+const STEPS=[
+  {n:'01',ic:'⬇️',t:'Retrieval',tz:'数据下载',d:'EMDB FTP density map + RCSB PDB atomic model. Auto-fetch resolution metadata.',dz:'EMDB FTP 密度图 + RCSB PDB 原子模型，自动获取分辨率元数据。',tool:'requests · tqdm'},
+  {n:'02',ic:'🔄',t:'Resampling',tz:'重采样',d:'scipy zoom → uniform 1.0 Å/voxel. Corrects non-standard MRC axis ordering.',dz:'scipy zoom 重采样至 1.0 Å/voxel，修正非标准 MRC 轴排列。',tool:'scipy · mrcfile'},
+  {n:'03',ic:'📊',t:'Normalization',tz:'归一化',d:'98th-percentile on non-zero voxels. Clamp to [0,1] for consistent model input.',dz:'非零体素 98 百分位归一化，clip 到 [0,1]。',tool:'numpy'},
+  {n:'04',ic:'🔬',t:'Alignment QC',tz:'对齐质控',d:'PHENIX map_model_cc (--force) → CC_mask / CC_volume / CC_peaks. Pintilie Q-score.',dz:'PHENIX map_model_cc → CC_mask/CC_volume/CC_peaks，Pintilie Q-score。',tool:'PHENIX 2.0'},
+  {n:'05',ic:'🧩',t:'Domain Segmentation',tz:'结构域分割',d:'Merizo per-chain deep learning. IDs propagated to all bio-assembly copies with offset.',dz:'Merizo 逐链深度学习，ID 加偏移传播到生物组装体所有副本。',tool:'Merizo · PyTorch'},
+  {n:'06',ic:'🏷️',t:'Voxel Labeling',tz:'体素标注',d:'3 KDTree groups: all-atom (seg/atom), CA (aa/ss/chain/domain/iface), backbone (qscore).',dz:'三组 KDTree：全原子（seg/atom），CA（aa/ss/chain/domain/界面），骨架（qscore）。',tool:'gemmi · scipy'},
+  {n:'07',ic:'✨',t:'Simulated Density',tz:'模拟密度',d:'ChimeraX molmap from bio-assembly PDB → ideal noiseless density (denoising target).',dz:'ChimeraX molmap 从生物组装体 PDB 生成理想无噪声密度（去噪目标）。',tool:'ChimeraX 1.11'},
+  {n:'08',ic:'🏆',t:'Tier Classification',tz:'质量分级',d:'Resolution-binned CC_mask + Q-score → Gold / Silver / Bronze / Reject.',dz:'分辨率分档 CC_mask + Q-score → Gold / Silver / Bronze / Reject。',tool:'Classifier'}
+];
+const pg=document.getElementById('pg');
+STEPS.forEach(s=>{
+  pg.innerHTML+=`<div class="pc"><div class="pn">STEP ${s.n}</div><div class="pi">${s.ic}</div><div class="pt">${s.t} <span style="color:var(--text-dim);font-weight:400">/ ${s.tz}</span></div><div class="pd en">${s.d}</div><div class="pd zh" style="display:none">${s.dz}</div><span class="ptool">${s.tool}</span></div>`;
+});
 </script>
 </body>
 </html>
