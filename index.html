@@ -328,6 +328,9 @@ body.zh-mode .en-i{display:none!important}
   <div class="pmodal-content" id="pmodal-content"></div>
 </div>
 
+<!-- Research data MUST load before main script -->
+<script src="research-data.js"></script>
+
 <script>
 // ═══ Language ═══
 function setLang(l){
@@ -660,18 +663,21 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeLightbox(); closeModal(); }
 });
 
-// Load research data if available
+// Load research data (now guaranteed to be loaded since research-data.js is above)
 if (window.RESEARCH_DATA) {
   Object.keys(window.RESEARCH_DATA).forEach(id => {
     const r = RESEARCH.find(x => x.id === id);
     if (r) r.projects = window.RESEARCH_DATA[id];
   });
   updateProjectCounts();
+  console.log('Research data loaded:', Object.keys(window.RESEARCH_DATA).length, 'directions');
+} else {
+  console.warn('window.RESEARCH_DATA not found — research-data.js may have failed to load');
 }
 </script>
 
-<!-- Research data will be injected here by build -->
-<script src="research-data.js"></script>
+<!-- (research-data.js is loaded above before main script) -->
+
 
 </body>
 </html>
