@@ -35,32 +35,19 @@ h1 .l1{display:block;color:#fff}
 h1 .l2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--accent3) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--text-dim);line-height:1.8;max-width:680px;margin:0 auto 50px}
 
-/* STATS - new style: independent cards with green glow */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:840px;margin:0 auto 50px}
-@media (max-width:720px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
-.stat-card{
-  position:relative;padding:28px 16px;text-align:center;
-  background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.02));
-  border:1px solid rgba(16,185,129,.25);
-  border-radius:16px;
-  transition:all .35s;
-  overflow:hidden;
-}
-.stat-card::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(circle at 50% 0%,rgba(16,185,129,.18),transparent 60%);
-  opacity:0;transition:opacity .3s;
-}
-.stat-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 20px 60px rgba(16,185,129,.18)}
-.stat-card:hover::before{opacity:1}
+/* STATS - "single floating" style, no boxes, naked numbers on the page */
+.stats-grid{display:flex;justify-content:center;gap:60px;max-width:1000px;margin:0 auto 56px;flex-wrap:wrap}
+@media (max-width:720px){.stats-grid{gap:30px}}
+.stat-card{text-align:center;padding:8px 4px}
 .stat-card .num{
-  font-size:2.6rem;font-weight:900;line-height:1;
-  background:linear-gradient(135deg,#34d399,#10b981 60%,#059669);
+  font-size:clamp(2.6rem, 5vw, 3.6rem);font-weight:900;line-height:1.25;
+  background:linear-gradient(135deg,#34d399 0%,#10b981 50%,#059669 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 14px rgba(16,185,129,.4));
-  position:relative;
+  filter:drop-shadow(0 0 18px rgba(16,185,129,.45));
+  padding:6px 0;
+  font-feature-settings: "tnum";
 }
-.stat-card .lbl{font-size:.72rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-top:8px;position:relative}
+.stat-card .lbl{font-size:.75rem;color:var(--text-dim);letter-spacing:2.5px;text-transform:uppercase;margin-top:4px}
 
 .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 .btn{padding:13px 30px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px;border:none}
@@ -379,10 +366,17 @@ body.zh-mode .zh{display:block}
 <script src="research-data.js"></script>
 
 <script>
-// ══ Language ══
+// ══ Language ══ (use JS inline-style to bypass CSS specificity issues)
 function setLang(l){
   ['en','zh'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===l));
   document.body.classList.toggle('zh-mode',l==='zh');
+  // Force language elements via inline style — overrides ANY CSS rule
+  document.querySelectorAll('.en').forEach(e=>{
+    e.style.setProperty('display', l==='en' ? '' : 'none', 'important');
+  });
+  document.querySelectorAll('.zh').forEach(e=>{
+    e.style.setProperty('display', l==='zh' ? '' : 'none', 'important');
+  });
   updateLabelCards();
   updatePipelineCards();
   updateGalleryCards();
@@ -791,6 +785,8 @@ updateLabelCards();
 updatePipelineCards();
 updateResearchCards();
 updateProjectCounts();
+// Apply initial language (hide .zh by default)
+setLang('en');
 </script>
 </body>
 </html>
