@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Plan A — Cryo-EM Map-Model Alignment Dataset</title>
 <meta name="description" content="Large-scale cryo-EM labeling dataset for deep learning structural biology">
+<script src="https://cdn.jsdelivr.net/npm/ngl@2.0.0-dev.38/dist/ngl.js"></script>
 <style>
 :root {
   --bg:#030810;--surface:#0a1220;--surface2:#0f1c30;
-  --accent:#00d4ff;--accent2:#8b5cf6;--accent3:#10b981;
+  --accent:#10b981;--accent2:#8b5cf6;--accent3:#00d4ff;
   --gold:#f59e0b;--silver:#94a3b8;--bronze:#b45309;
   --text:#e2eaf8;--text-dim:#64748b;
 }
@@ -16,34 +17,55 @@
 html{scroll-behavior:smooth}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 
-.lang-bar{position:fixed;top:16px;right:20px;z-index:1000;display:flex;gap:4px;background:rgba(3,8,16,.85);backdrop-filter:blur(16px);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:6px 8px}
+.lang-bar{position:fixed;top:16px;right:20px;z-index:1000;display:flex;gap:4px;background:rgba(3,8,16,.85);backdrop-filter:blur(16px);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:6px 8px}
 .lang-btn{padding:5px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;transition:all .2s;background:transparent;color:var(--text-dim)}
 .lang-btn.active{background:var(--accent);color:#000}
 
 /* HERO */
 #hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 20px;position:relative;overflow:hidden}
-.hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(0,212,255,.06) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 20% 80%,rgba(139,92,246,.05) 0%,transparent 60%)}
-.hero-bg::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:60px 60px;animation:gridpan 20s linear infinite}
+.hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(16,185,129,.06) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 20% 80%,rgba(139,92,246,.05) 0%,transparent 60%)}
+.hero-bg::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(16,185,129,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.04) 1px,transparent 1px);background-size:60px 60px;animation:gridpan 20s linear infinite}
 @keyframes gridpan{to{background-position:60px 60px}}
 .hero-content{position:relative;z-index:1;max-width:900px}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 20px;border:1px solid rgba(0,212,255,.3);border-radius:24px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);background:rgba(0,212,255,.05);margin-bottom:28px}
-.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:pulse 2s infinite}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 20px;border:1px solid rgba(16,185,129,.35);border-radius:24px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);background:rgba(16,185,129,.05);margin-bottom:28px}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;box-shadow:0 0 10px var(--accent)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:24px}
 h1 .l1{display:block;color:#fff}
-h1 .l2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 60%,var(--accent3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--text-dim);line-height:1.8;max-width:680px;margin:0 auto 44px}
-.stats-row{display:flex;justify-content:center;margin-bottom:44px;flex-wrap:wrap}
-.stat-box{padding:18px 32px;text-align:center;border:1px solid rgba(0,212,255,.1);background:rgba(10,18,32,.6)}
-.stat-box:first-child{border-radius:12px 0 0 12px}
-.stat-box:last-child{border-radius:0 12px 12px 0}
-.stat-box:not(:first-child){border-left:0}
-.stat-n{font-size:2rem;font-weight:900;color:var(--accent);line-height:1}
-.stat-l{font-size:.7rem;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+h1 .l2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--accent3) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--text-dim);line-height:1.8;max-width:680px;margin:0 auto 50px}
+
+/* STATS - new style: independent cards with green glow */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:840px;margin:0 auto 50px}
+@media (max-width:720px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{
+  position:relative;padding:28px 16px;text-align:center;
+  background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.02));
+  border:1px solid rgba(16,185,129,.25);
+  border-radius:16px;
+  transition:all .35s;
+  overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(16,185,129,.18),transparent 60%);
+  opacity:0;transition:opacity .3s;
+}
+.stat-card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 20px 60px rgba(16,185,129,.18)}
+.stat-card:hover::before{opacity:1}
+.stat-card .num{
+  font-size:2.6rem;font-weight:900;line-height:1;
+  background:linear-gradient(135deg,#34d399,#10b981 60%,#059669);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 14px rgba(16,185,129,.4));
+  position:relative;
+}
+.stat-card .lbl{font-size:.72rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-top:8px;position:relative}
+
 .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 .btn{padding:13px 30px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px;border:none}
-.btn-p{background:linear-gradient(135deg,var(--accent),#0099cc);color:#000}
-.btn-p:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,212,255,.4)}
+.btn-p{background:linear-gradient(135deg,var(--accent),#059669);color:#000}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(16,185,129,.4)}
 .btn-o{border:1.5px solid var(--accent2);color:var(--accent2);background:transparent}
 .btn-o:hover{background:rgba(139,92,246,.12);transform:translateY(-3px)}
 
@@ -51,63 +73,75 @@ h1 .l2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--ac
 .sl{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:block}
 h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;line-height:1.2;margin-bottom:18px}
 .sd{font-size:1rem;color:var(--text-dim);line-height:1.85;max-width:780px;margin-bottom:56px}
-.divider{height:1px;background:linear-gradient(to right,transparent,rgba(0,212,255,.15),transparent)}
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(16,185,129,.18),transparent)}
 
-/* GALLERY - Real Processed Data */
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
-.gcard{border-radius:20px;overflow:hidden;background:var(--surface);border:1px solid rgba(0,212,255,.12);cursor:pointer;transition:all .4s;position:relative}
-.gcard:hover{transform:translateY(-8px);border-color:rgba(0,212,255,.4);box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(0,212,255,.1)}
-.gcard-img{position:relative;height:280px;overflow:hidden;background:#030810}
+/* GALLERY */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.gcard{border-radius:18px;overflow:hidden;background:var(--surface);border:1px solid rgba(16,185,129,.1);cursor:pointer;transition:all .35s;position:relative}
+.gcard:hover{transform:translateY(-6px);border-color:rgba(16,185,129,.35);box-shadow:0 26px 60px rgba(0,0,0,.5)}
+.gcard-img{position:relative;height:240px;overflow:hidden;background:#030810}
 .gcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
 .gcard:hover .gcard-img img{transform:scale(1.08)}
-.gcard-tags{position:absolute;top:14px;left:14px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+.gcard-tags{position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
 .gtag{font-size:10px;padding:3px 10px;border-radius:12px;font-weight:700;backdrop-filter:blur(8px)}
-.gcard-overlay{position:absolute;bottom:0;left:0;right:0;padding:60px 20px 16px;background:linear-gradient(to top,var(--surface) 30%,transparent);z-index:1}
-.gcard-id{font-size:11px;letter-spacing:1.5px;color:var(--accent);font-weight:700;margin-bottom:4px}
-.gcard-title{font-size:1.05rem;font-weight:700;margin-bottom:4px;color:#fff}
-.gcard-info{padding:0 20px 20px}
-.gcard-meta{display:flex;gap:14px;font-size:0.78rem;color:var(--text-dim);margin-top:10px}
+.gcard-overlay{position:absolute;bottom:0;left:0;right:0;padding:50px 18px 14px;background:linear-gradient(to top,var(--surface) 30%,transparent);z-index:1}
+.gcard-id{font-size:11px;letter-spacing:1.2px;color:var(--accent);font-weight:700;margin-bottom:3px}
+.gcard-title{font-size:1rem;font-weight:700;color:#fff}
+.gcard-info{padding:14px 18px 18px}
+.gcard-meta{display:flex;gap:12px;font-size:0.77rem;color:var(--text-dim);margin-bottom:12px;flex-wrap:wrap}
 .gcard-meta span{display:inline-flex;align-items:center;gap:4px}
-.gcard-views{display:flex;gap:6px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)}
-.gview-thumb{flex:1;height:50px;border-radius:6px;background-size:cover;background-position:center;opacity:.7;transition:opacity .2s}
+.gcard-views{display:flex;gap:5px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05)}
+.gview-thumb{flex:1;height:42px;border-radius:5px;background-size:cover;background-position:center;opacity:.65;transition:opacity .2s}
 .gcard:hover .gview-thumb{opacity:1}
+.gcard-cta{margin-top:10px;font-size:.78rem;color:var(--accent);font-weight:700;display:flex;align-items:center;gap:6px}
 
-/* LIGHTBOX */
-.lightbox{display:none;position:fixed;inset:0;z-index:2000;background:rgba(3,8,16,.96);backdrop-filter:blur(20px);overflow-y:auto;padding:60px 20px 40px}
-.lightbox.show{display:block}
-.lb-close{position:fixed;top:20px;right:20px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2001}
-.lb-close:hover{background:rgba(0,212,255,.2);border-color:var(--accent)}
-.lb-content{max-width:1100px;margin:0 auto}
-.lb-header{text-align:center;margin-bottom:40px}
-.lb-id{font-size:14px;letter-spacing:2px;color:var(--accent);font-weight:700;margin-bottom:8px}
-.lb-title{font-size:2rem;font-weight:800;color:#fff;margin-bottom:12px}
-.lb-subtitle{color:var(--text-dim);font-size:1rem;margin-bottom:20px}
-.lb-stats{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:30px}
-.lb-stat{padding:8px 18px;border:1px solid rgba(0,212,255,.2);border-radius:20px;font-size:13px}
-.lb-stat strong{color:var(--accent)}
-.lb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:24px}
-.lb-view{border-radius:16px;overflow:hidden;background:var(--surface);border:1px solid rgba(0,212,255,.1)}
-.lb-view-header{padding:14px 18px;background:rgba(10,18,32,.9);border-bottom:1px solid rgba(0,212,255,.1)}
-.lb-view-title{font-size:14px;font-weight:700;color:var(--accent)}
-.lb-view-desc{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.5}
-.lb-view img{width:100%;display:block}
+/* MODAL with NGL */
+.modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(3,8,16,.97);backdrop-filter:blur(20px);overflow-y:auto;padding:60px 20px}
+.modal.show{display:block}
+.modal-close{position:fixed;top:20px;right:20px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2001}
+.modal-close:hover{background:rgba(16,185,129,.25);border-color:var(--accent)}
+.modal-body{max-width:1200px;margin:0 auto}
+.modal-header{text-align:center;margin-bottom:32px}
+.modal-id{font-size:13px;letter-spacing:2px;color:var(--accent);font-weight:700;margin-bottom:8px}
+.modal-title{font-size:1.7rem;font-weight:800;color:#fff;margin-bottom:14px}
+.modal-stats{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.mstat{padding:7px 16px;border:1px solid rgba(16,185,129,.25);border-radius:18px;font-size:12px}
+.mstat strong{color:var(--accent)}
 
-/* Labels */
-.lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
-.lc{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.06);transition:all .3s;background:var(--surface)}
-.lc:hover{transform:translateY(-4px);border-color:rgba(0,212,255,.3)}
-.lih{height:120px;position:relative;overflow:hidden}
-.lih canvas{width:100%;height:100%;display:block}
-.lov{position:absolute;inset:0;background:linear-gradient(to top,var(--surface) 0%,transparent 55%);pointer-events:none}
-.lb_b{padding:14px}
-.ln{font-weight:700;font-size:.9rem;margin-bottom:5px}
-.ld{font-size:.8rem;color:var(--text-dim);line-height:1.55}
-.lchip{display:inline-block;margin-top:7px;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700}
+/* Interactive 3D viewer */
+.ngl-wrap{border-radius:16px;overflow:hidden;border:1px solid rgba(16,185,129,.18);background:var(--surface);margin-bottom:32px;box-shadow:0 0 50px rgba(16,185,129,.05)}
+.ngl-header{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:rgba(10,18,32,.85);border-bottom:1px solid rgba(16,185,129,.12);flex-wrap:wrap;gap:10px}
+.ngl-title{font-size:13px;font-weight:700;color:var(--accent)}
+.ngl-hint{font-size:10px;color:var(--text-dim);letter-spacing:.5px}
+#ngl-vp{width:100%;height:480px;display:block}
+.ngl-controls{padding:14px;background:rgba(10,18,32,.5);display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ngl-btn{padding:6px 16px;border-radius:18px;border:1px solid rgba(16,185,129,.2);background:rgba(16,185,129,.06);color:var(--accent);cursor:pointer;font-size:12px;font-weight:600;transition:all .2s}
+.ngl-btn.active,.ngl-btn:hover{background:rgba(16,185,129,.2);border-color:var(--accent)}
+
+/* Static views grid */
+.views-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.view-card{border-radius:14px;overflow:hidden;background:var(--surface);border:1px solid rgba(16,185,129,.08)}
+.view-head{padding:12px 16px;background:rgba(10,18,32,.85);border-bottom:1px solid rgba(16,185,129,.1)}
+.view-title{font-size:13px;font-weight:700;color:var(--accent)}
+.view-desc{font-size:10.5px;color:var(--text-dim);margin-top:3px;line-height:1.5}
+.view-card img{width:100%;display:block}
+
+/* Labels - 4x2 with REAL images */
+.labels-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media (max-width:1000px){.labels-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.labels-grid{grid-template-columns:1fr}}
+.label-card{border-radius:14px;overflow:hidden;border:1px solid rgba(16,185,129,.1);background:var(--surface);transition:all .3s}
+.label-card:hover{transform:translateY(-4px);border-color:rgba(16,185,129,.35)}
+.label-img{width:100%;height:170px;background:#030810;display:block;object-fit:cover}
+.label-body{padding:14px 16px}
+.label-name{font-weight:700;font-size:.95rem;margin-bottom:5px}
+.label-desc{font-size:.78rem;color:var(--text-dim);line-height:1.55;min-height:48px}
+.label-chip{display:inline-block;margin-top:8px;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700}
 
 /* Pipeline */
 .pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-.pc{background:var(--surface);border:1px solid rgba(0,212,255,.08);border-radius:14px;padding:24px 20px;transition:all .3s}
-.pc:hover{transform:translateY(-4px);border-color:rgba(0,212,255,.25)}
+.pc{background:var(--surface);border:1px solid rgba(16,185,129,.08);border-radius:14px;padding:24px 20px;transition:all .3s}
+.pc:hover{transform:translateY(-4px);border-color:rgba(16,185,129,.25)}
 .pn{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:10px}
 .pi{font-size:1.8rem;margin-bottom:10px}
 .pt{font-size:.95rem;font-weight:700;margin-bottom:7px}
@@ -127,20 +161,17 @@ h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;line-height:1.2;margin-b
 .tc.gold .tn{color:var(--gold)}.tc.silver .tn{color:var(--silver)}.tc.bronze .tn{color:var(--bronze)}.tc.reject .tn{color:#ef4444}
 .ts{font-size:.82rem;color:var(--text-dim);line-height:1.8}
 
-/* Research Section */
-.research-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
-.rcard{border-radius:18px;padding:32px 28px;background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);border:1px solid rgba(139,92,246,.18);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
-.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--accent),var(--accent2),var(--accent3));opacity:0;transition:opacity .3s}
+/* Research */
+.research-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
+.rcard{border-radius:18px;padding:30px 26px;background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);border:1px solid rgba(139,92,246,.18);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--accent),var(--accent3),var(--accent2));opacity:0;transition:opacity .3s}
 .rcard:hover{transform:translateY(-6px);border-color:var(--accent2);box-shadow:0 30px 80px rgba(139,92,246,.15)}
 .rcard:hover::before{opacity:1}
-.ricon{font-size:2.6rem;margin-bottom:18px}
-.rtag{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(0,212,255,.1);color:var(--accent);margin-bottom:12px;letter-spacing:1px}
-.rtitle{font-size:1.2rem;font-weight:800;margin-bottom:10px;line-height:1.3}
-.rtitle-zh{font-size:0.85rem;color:var(--text-dim);font-weight:500;margin-bottom:14px}
-.rdesc{font-size:0.88rem;color:var(--text-dim);line-height:1.7;margin-bottom:16px}
+.ricon{font-size:2.4rem;margin-bottom:16px}
+.rtag{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(16,185,129,.1);color:var(--accent);margin-bottom:12px;letter-spacing:1px}
+.rtitle{font-size:1.15rem;font-weight:800;margin-bottom:12px;line-height:1.3}
+.rdesc{font-size:0.86rem;color:var(--text-dim);line-height:1.7;margin-bottom:16px}
 .rcount{font-size:11px;color:var(--accent3);font-weight:700;letter-spacing:0.5px;display:inline-flex;align-items:center;gap:6px}
-.rcount::before{content:'→';display:inline-block;transition:transform .2s}
-.rcard:hover .rcount::before{transform:translateX(4px)}
 
 /* Project Modal */
 .pmodal{display:none;position:fixed;inset:0;z-index:3000;background:rgba(3,8,16,.97);backdrop-filter:blur(24px);overflow-y:auto;padding:60px 20px}
@@ -148,49 +179,40 @@ h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;line-height:1.2;margin-b
 .pmodal-content{max-width:1100px;margin:0 auto}
 .pm-header{text-align:center;margin-bottom:50px;padding-bottom:30px;border-bottom:1px solid rgba(139,92,246,.2)}
 .pm-cat{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:10px}
-.pm-title{font-size:2.2rem;font-weight:900;margin-bottom:10px;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pm-title{font-size:2rem;font-weight:900;margin-bottom:10px;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .pm-subtitle{color:var(--text-dim);font-size:1rem}
-.project-list{display:flex;flex-direction:column;gap:24px}
-.proj{border-radius:16px;background:var(--surface);border:1px solid rgba(0,212,255,.1);overflow:hidden;transition:all .3s}
-.proj:hover{border-color:rgba(0,212,255,.3)}
-.proj-header{padding:24px 28px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.project-list{display:flex;flex-direction:column;gap:20px}
+.proj{border-radius:16px;background:var(--surface);border:1px solid rgba(16,185,129,.1);overflow:hidden;transition:all .3s}
+.proj:hover{border-color:rgba(16,185,129,.3)}
+.proj-header{padding:22px 26px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .proj-info{flex:1}
 .proj-num{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:1.5px;margin-bottom:6px}
-.proj-name{font-size:1.15rem;font-weight:700;margin-bottom:4px}
-.proj-summary{font-size:0.88rem;color:var(--text-dim);line-height:1.5}
-.proj-toggle{width:40px;height:40px;border-radius:50%;background:rgba(0,212,255,.1);color:var(--accent);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s}
+.proj-name{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.proj-summary{font-size:0.86rem;color:var(--text-dim);line-height:1.5}
+.proj-toggle{width:38px;height:38px;border-radius:50%;background:rgba(16,185,129,.1);color:var(--accent);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s}
 .proj.open .proj-toggle{transform:rotate(45deg);background:var(--accent);color:#000}
-.proj-body{display:none;padding:8px 28px 28px;border-top:1px solid rgba(255,255,255,.06)}
+.proj-body{display:none;padding:8px 26px 26px;border-top:1px solid rgba(255,255,255,.06)}
 .proj.open .proj-body{display:block}
-.proj-section{margin-top:24px}
+.proj-section{margin-top:22px}
 .proj-section-title{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
-.proj-section-content{font-size:0.92rem;color:var(--text);line-height:1.85}
-.proj-section-content p{margin-bottom:12px}
-.proj-section-content ul{padding-left:20px;margin-bottom:12px}
-.proj-section-content li{margin-bottom:6px}
+.proj-section-content{font-size:0.9rem;color:var(--text);line-height:1.8}
+.proj-section-content p{margin-bottom:10px}
+.proj-section-content ul{padding-left:20px;margin-bottom:10px}
+.proj-section-content li{margin-bottom:5px}
 .proj-section-content strong{color:#fff}
 .proj-section-content em{color:var(--accent);font-style:normal}
-.proj-section-content code{background:rgba(0,212,255,.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:0.85em}
-.proj-tier{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
-.proj-tier-item{padding:6px 14px;border-radius:12px;font-size:11px;font-weight:700;background:rgba(0,212,255,.08);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+.proj-section-content code{background:rgba(16,185,129,.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:0.85em}
+.proj-tier{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.proj-tier-item{padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:rgba(16,185,129,.08);color:var(--accent);border:1px solid rgba(16,185,129,.2)}
 
 footer{padding:50px 24px;text-align:center;border-top:1px solid rgba(255,255,255,.05);background:var(--surface)}
 footer .fl{font-size:1.2rem;font-weight:900;margin-bottom:14px}
 footer .fm{color:var(--text-dim);font-size:.85rem;line-height:1.9}
 footer a{color:var(--accent);text-decoration:none}
-footer a:hover{text-decoration:underline}
 
 .zh{display:none}
 body.zh-mode .en{display:none}
 body.zh-mode .zh{display:block}
-body.zh-mode .zh-i{display:inline!important}
-.zh-i{display:none!important}
-body.zh-mode .en-i{display:none!important}
-
-@media (max-width:768px){
-  .pm-title{font-size:1.5rem}
-  .proj-header{flex-wrap:wrap}
-}
 </style>
 </head>
 <body>
@@ -200,85 +222,108 @@ body.zh-mode .en-i{display:none!important}
   <button class="lang-btn" onclick="setLang('zh')" id="btn-zh">中文</button>
 </div>
 
-<!-- HERO -->
+<!-- ══════════ HERO ══════════ -->
 <section id="hero">
   <div class="hero-bg"></div>
   <div class="hero-content">
     <div class="hero-badge"><span class="badge-dot"></span>
-      <span class="en-i">Cryo-EM · Deep Learning · Structural Biology</span>
-      <span class="zh-i">冷冻电镜 · 深度学习 · 结构生物学</span>
+      <span class="en">Cryo-EM · Deep Learning · Structural Biology</span>
+      <span class="zh">冷冻电镜 · 深度学习 · 结构生物学</span>
     </div>
     <h1>
-      <span class="l1">Plan A &nbsp;/&nbsp; A 计划</span>
-      <span class="l2 en-i">Cryo-EM Alignment Dataset</span>
-      <span class="l2 zh-i">冷冻电镜对齐数据集</span>
+      <span class="l1 en">Plan A</span>
+      <span class="l1 zh">A 计划</span>
+      <span class="l2 en">Cryo-EM Alignment Dataset</span>
+      <span class="l2 zh">冷冻电镜对齐数据集</span>
     </h1>
     <p class="hero-sub en">A large-scale, quality-graded cryo-EM map-model alignment dataset with 8-channel voxel annotations — built for training next-generation structural biology AI.</p>
-    <p class="hero-sub zh" style="display:none">大规模、质量分级的冷冻电镜密度图—原子模型对齐数据集，提供 8 通道体素标注，专为训练新一代结构生物学 AI 构建。</p>
-    <div class="stats-row">
-      <div class="stat-box"><div class="stat-n">11K+</div><div class="stat-l en-i">PDB Entries</div><div class="stat-l zh-i">PDB 条目</div></div>
-      <div class="stat-box"><div class="stat-n">8</div><div class="stat-l en-i">Label Channels</div><div class="stat-l zh-i">标注通道</div></div>
-      <div class="stat-box"><div class="stat-n">1.0 Å</div><div class="stat-l en-i">Voxel Size</div><div class="stat-l zh-i">体素大小</div></div>
-      <div class="stat-box"><div class="stat-n">1–6 Å</div><div class="stat-l en-i">Resolution</div><div class="stat-l zh-i">分辨率范围</div></div>
+    <p class="hero-sub zh">大规模、质量分级的冷冻电镜密度图—原子模型对齐数据集，提供 8 通道体素标注，专为训练新一代结构生物学 AI 构建。</p>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num">11K+</div>
+        <div class="lbl en">PDB Entries</div>
+        <div class="lbl zh">PDB 条目</div>
+      </div>
+      <div class="stat-card"><div class="num">8</div>
+        <div class="lbl en">Label Channels</div>
+        <div class="lbl zh">标注通道</div>
+      </div>
+      <div class="stat-card"><div class="num">1.0 Å</div>
+        <div class="lbl en">Voxel Size</div>
+        <div class="lbl zh">体素大小</div>
+      </div>
+      <div class="stat-card"><div class="num">1–6 Å</div>
+        <div class="lbl en">Resolution</div>
+        <div class="lbl zh">分辨率范围</div>
+      </div>
     </div>
+
     <div class="cta-row">
-      <a href="https://github.com/wyku/protein_labeler" class="btn btn-p">⭐ <span class="en-i">View Code</span><span class="zh-i">查看代码</span></a>
-      <a href="#gallery" class="btn btn-o">🔬 <span class="en-i">See Real Outputs</span><span class="zh-i">看真实输出</span></a>
+      <a href="https://github.com/wyku/protein_labeler" class="btn btn-p">
+        ⭐ <span class="en">View Code</span><span class="zh">查看代码</span>
+      </a>
+      <a href="#gallery" class="btn btn-o">
+        🔬 <span class="en">See Real Outputs</span><span class="zh">看真实输出</span>
+      </a>
     </div>
   </div>
 </section>
 <div class="divider"></div>
 
-<!-- GALLERY: REAL PROCESSED DATA -->
+<!-- ══════════ GALLERY ══════════ -->
 <div class="sw" id="gallery">
-  <span class="sl en-i">Pipeline Output Gallery</span>
-  <span class="sl zh-i" style="display:none">流水线输出画廊</span>
-  <h2 class="en">Real Outputs from Our Pipeline</h2>
-  <h2 class="zh" style="display:none">我们流水线的真实输出</h2>
+  <span class="sl en">Pipeline Output Gallery</span>
+  <span class="sl zh">流水线输出画廊</span>
+  <h2 class="en">Real Outputs · 2 Gold + 2 Silver Entries</h2>
+  <h2 class="zh">真实输出 · 2 个金牌 + 2 个银牌条目</h2>
   <p class="sd en">
-    Below are <strong>actual 3D renderings of our pipeline outputs</strong> — generated from the labeled <code>.mrc</code> density maps and atomic models we produce.
-    Each entry has been processed through all 8 pipeline steps with PHENIX QC + ChimeraX simulation + Merizo domain segmentation.
-    <strong>Click any card to see all 4 views</strong> (density map · density+model overlay · domains · chains).
+    Below are <strong>real 3D renderings of our pipeline outputs</strong> on the highest-quality entries from our processed dataset.
+    Click any card to open an <strong>interactive 3D viewer</strong> — drag to rotate, scroll to zoom, switch representation styles.
   </p>
-  <p class="sd zh" style="display:none">
-    下方是<strong>我们流水线输出的真实三维渲染</strong> —— 从我们生成的标注 <code>.mrc</code> 密度图和原子模型直接渲染而成。
-    每个条目都经过 8 步流水线完整处理：PHENIX QC + ChimeraX 模拟 + Merizo 结构域分割。
-    <strong>点击任意卡片查看 4 视角全图</strong>（密度图 · 密度+模型叠加 · 结构域 · 链）。
+  <p class="sd zh">
+    下方是我们流水线在<strong>已处理的最高质量条目上</strong>的真实三维渲染输出。
+    点击任意卡片打开<strong>可交互的三维查看器</strong> —— 鼠标拖动旋转、滚轮缩放、切换显示样式。
   </p>
   <div class="gallery-grid" id="gallery-grid"></div>
 </div>
 <div class="divider"></div>
 
-<!-- LABEL CHANNELS -->
+<!-- ══════════ LABELS - REAL DATA, 4x2 ══════════ -->
 <div class="sw" id="labels">
-  <span class="sl en-i">8-Channel Voxel Annotations</span>
-  <span class="sl zh-i" style="display:none">8 通道体素标注</span>
-  <h2 class="en">Rich Semantic Labels at Atomic Resolution</h2>
-  <h2 class="zh" style="display:none">原子分辨率的丰富语义标注</h2>
-  <p class="sd en">CA-only paradigm: semantic labels placed at alpha-carbon positions, reducing voxel noise while preserving all structural information across 8 channels.</p>
-  <p class="sd zh" style="display:none">CA-only 范式：语义标签放置在 α-碳位置，在保留全部结构信息的同时降低体素噪声，覆盖 8 个通道。</p>
-  <div class="lg" id="lg"></div>
+  <span class="sl en">8-Channel Voxel Annotations</span>
+  <span class="sl zh">8 通道体素标注</span>
+  <h2 class="en">Real Label Visualizations from Our Pipeline</h2>
+  <h2 class="zh">流水线真实标注通道可视化</h2>
+  <p class="sd en">
+    All 8 images below are <strong>rendered directly from our actual <code>label_*.mrc</code> output files</strong>
+    on entry EMD-71784 (a 2.36 Å Gold-tier sample). Each panel shows what one of the 8 label channels looks like in 3D.
+  </p>
+  <p class="sd zh">
+    下方 8 张图均<strong>直接来自我们真实的 <code>label_*.mrc</code> 输出文件</strong>，
+    使用 EMD-71784（2.36 Å 金牌样本）渲染。每张展示了 8 个标注通道之一的三维形态。
+  </p>
+  <div class="labels-grid" id="labels-grid"></div>
 </div>
 <div class="divider"></div>
 
-<!-- PIPELINE -->
+<!-- ══════════ PIPELINE ══════════ -->
 <div class="sw" id="pipeline">
-  <span class="sl en-i">Automated Processing Pipeline</span>
-  <span class="sl zh-i" style="display:none">自动化处理流水线</span>
+  <span class="sl en">Automated Processing Pipeline</span>
+  <span class="sl zh">自动化处理流水线</span>
   <h2 class="en">8 Steps: Raw EMDB → Training-Ready Labels</h2>
-  <h2 class="zh" style="display:none">8 步：原始 EMDB → 可训练标注</h2>
+  <h2 class="zh">8 步：原始 EMDB → 可训练标注</h2>
   <div class="pg" id="pg"></div>
 </div>
 <div class="divider"></div>
 
-<!-- TIERS -->
+<!-- ══════════ TIERS ══════════ -->
 <div class="sw">
-  <span class="sl en-i">Quality System</span>
-  <span class="sl zh-i" style="display:none">质量体系</span>
+  <span class="sl en">Quality System</span>
+  <span class="sl zh">质量体系</span>
   <h2 class="en">Resolution-Binned Quality Tiers</h2>
-  <h2 class="zh" style="display:none">分辨率分档质量评级</h2>
+  <h2 class="zh">分辨率分档质量评级</h2>
   <p class="sd en">PHENIX CC_mask + Q-score + resolution → four quality tiers. Enables curriculum learning and task-specific data selection.</p>
-  <p class="sd zh" style="display:none">PHENIX CC_mask + Q-score + 分辨率 → 四档质量，支持课程学习和特定任务数据筛选。</p>
+  <p class="sd zh">PHENIX CC_mask + Q-score + 分辨率 → 四档质量，支持课程学习和特定任务数据筛选。</p>
   <div class="tg">
     <div class="tc gold"><div class="ti">🥇</div><div class="tn">Gold</div><div class="ts">1.0–2.5 Å<br>CC_mask ≥ 0.75<br>Q-score ≥ 0.65</div></div>
     <div class="tc silver"><div class="ti">🥈</div><div class="tn">Silver</div><div class="ts">Multi-band<br>CC_mask ≥ 0.65<br>Q-score ≥ 0.50</div></div>
@@ -288,21 +333,21 @@ body.zh-mode .en-i{display:none!important}
 </div>
 <div class="divider"></div>
 
-<!-- RESEARCH DIRECTIONS -->
+<!-- ══════════ RESEARCH ══════════ -->
 <div class="sw" id="research">
-  <span class="sl en-i">Research Roadmap</span>
-  <span class="sl zh-i" style="display:none">科研路线图</span>
-  <h2 class="en">5 Frontiers · 20+ Concrete Projects</h2>
-  <h2 class="zh" style="display:none">5 大前沿 · 20+ 具体项目</h2>
+  <span class="sl en">Research Roadmap</span>
+  <span class="sl zh">科研路线图</span>
+  <h2 class="en">5 Frontiers · 19 Concrete Projects</h2>
+  <h2 class="zh">5 大前沿 · 19 个具体项目</h2>
   <p class="sd en">
-    Plan A is not just a dataset — it is the <strong>foundation</strong> for an entire class of research projects that were previously impossible due to data limitations.
-    Below are 5 major directions, each containing concrete projects with publication potential at <strong>Nature Methods / Nature Communications / eLife</strong> level.
-    <em>Click any direction to see its specific projects.</em>
+    Plan A is not just a dataset — it is the <strong>foundation</strong> for an entire class of research projects.
+    Each direction below contains detailed project plans with publication potential at <strong>Nature Methods / Nature Communications</strong> level.
+    Click any direction to explore its concrete projects.
   </p>
-  <p class="sd zh" style="display:none">
-    Plan A 不只是一个数据集 —— 它是因为数据限制而<strong>过去无法开展</strong>的一整类研究的<strong>基础</strong>。
-    下面列出 5 大方向，每个方向下都有具体项目，发表潜力达到 <strong>Nature Methods / Nature Communications / eLife</strong> 级别。
-    <em>点击任意方向查看具体项目。</em>
+  <p class="sd zh">
+    Plan A 不只是一个数据集 —— 它是一整类研究的<strong>基础</strong>。
+    下方每个方向都包含详细的项目计划书，发表潜力达 <strong>Nature Methods / Nature Communications</strong> 级别。
+    点击任意方向查看具体项目。
   </p>
   <div class="research-grid" id="research-grid"></div>
 </div>
@@ -311,373 +356,441 @@ body.zh-mode .en-i{display:none!important}
   <div class="fl">Plan A &nbsp;/&nbsp; A 计划</div>
   <div class="fm">
     Built with <strong>PHENIX 2.0</strong> · <strong>ChimeraX 1.11</strong> · <strong>Merizo</strong> · <strong>gemmi</strong> · <strong>mrcfile</strong><br>
-    Data from <a href="https://www.ebi.ac.uk/emdb/">EMDB</a> &amp; <a href="https://www.rcsb.org/">RCSB PDB</a>
-    &nbsp;·&nbsp; <a href="https://github.com/wyku/protein_labeler">GitHub</a>
+    <span class="en">Data from <a href="https://www.ebi.ac.uk/emdb/">EMDB</a> &amp; <a href="https://www.rcsb.org/">RCSB PDB</a>
+    &nbsp;·&nbsp; <a href="https://github.com/wyku/protein_labeler">GitHub</a></span>
+    <span class="zh">数据来自 <a href="https://www.ebi.ac.uk/emdb/">EMDB</a> 和 <a href="https://www.rcsb.org/">RCSB PDB</a>
+    &nbsp;·&nbsp; <a href="https://github.com/wyku/protein_labeler">GitHub</a></span>
   </div>
 </footer>
 
-<!-- ═══════════ LIGHTBOX ═══════════ -->
-<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
-  <button class="lb-close" onclick="closeLightbox()">×</button>
-  <div class="lb-content" id="lb-content"></div>
+<!-- ENTRY DETAIL MODAL with interactive NGL viewer -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <button class="modal-close" onclick="closeModal()">×</button>
+  <div class="modal-body" id="modal-body"></div>
 </div>
 
-<!-- ═══════════ PROJECT MODAL ═══════════ -->
-<div class="pmodal" id="pmodal" onclick="if(event.target===this)closeModal()">
-  <button class="lb-close" onclick="closeModal()">×</button>
+<!-- RESEARCH PROJECT MODAL -->
+<div class="pmodal" id="pmodal" onclick="if(event.target===this)closePModal()">
+  <button class="modal-close" onclick="closePModal()">×</button>
   <div class="pmodal-content" id="pmodal-content"></div>
 </div>
 
-<!-- Research data MUST load before main script -->
+<!-- Research data loaded BEFORE main script -->
 <script src="research-data.js"></script>
 
 <script>
-// ═══ Language ═══
+// ══ Language ══
 function setLang(l){
   ['en','zh'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===l));
   document.body.classList.toggle('zh-mode',l==='zh');
-  document.querySelectorAll('.zh-i').forEach(e=>e.style.display=l==='zh'?'inline':'none');
-  document.querySelectorAll('.en-i').forEach(e=>e.style.display=l==='en'?'inline':'none');
-  document.querySelectorAll('.zh').forEach(e=>e.style.display=l==='zh'?'block':'none');
-  document.querySelectorAll('.en').forEach(e=>e.style.display=l==='en'?'block':'none');
+  updateLabelCards();
+  updatePipelineCards();
+  updateGalleryCards();
+  updateResearchCards();
+  updateProjectCounts();
 }
+function isZh(){ return document.body.classList.contains('zh-mode'); }
 
-// ═══ Gallery Data ═══
+// ══ Gallery ══
 const GALLERY = [
-  {
-    id: 'EMD-61914_9JZI',
-    name_en: '12-Domain Complex',
-    name_zh: '12-结构域复合物',
-    tier: 'silver', tier_label: '🥈 Silver',
-    res: '3.09 Å', cc: 'CC=0.830',
-    chains: 7, domains: 12,
-    desc_en: 'A multi-chain assembly with 7 chains and 12 distinct domains, demonstrating Merizo segmentation across bio-assembly copies.',
-    desc_zh: '7 链复合物，Merizo 识别出 12 个结构域，展示了跨生物组装体的结构域传播效果。',
-    base: 'assets/img/EMD-61914_9JZI'
-  },
-  {
-    id: 'EMD-53181_9QHW',
-    name_en: '4-Chain Silver Entry',
-    name_zh: '4-链银档条目',
-    tier: 'silver', tier_label: '🥈 Silver',
-    res: '3.30 Å', cc: 'CC=0.749',
-    chains: 4, domains: 8,
-    desc_en: 'A 4-chain assembly with 8 well-defined domains. Mid-resolution case showing both density and atomic model fitting quality.',
-    desc_zh: '4 链组装体，8 个清晰定义的结构域。中等分辨率，展示密度图和原子模型的拟合质量。',
-    base: 'assets/img/EMD-53181_9QHW'
-  }
+  {id:'EMD-54226_9RSU', name_en:'8-Chain Multi-Domain Assembly', name_zh:'8 链多结构域组装体',
+    tier:'gold', tier_label:'🥇 Gold', tier_zh:'🥇 金牌',
+    res:'2.10 Å', cc:'CC=0.921', q:'Q=0.736', chains:8, domains:16,
+    desc_en:'High-resolution Gold-tier sample with 8 chains and 16 distinct domains — ideal for benchmarking model building algorithms.',
+    desc_zh:'高分辨率金牌样本，含 8 条链和 16 个独立结构域 —— 模型构建算法基准测试的理想样本。'},
+  {id:'EMD-71784_9PQJ', name_en:'High Q-score Gold Complex', name_zh:'高 Q-score 金牌复合物',
+    tier:'gold', tier_label:'🥇 Gold', tier_zh:'🥇 金牌',
+    res:'2.36 Å', cc:'CC=0.899', q:'Q=0.839', chains:6, domains:12,
+    desc_en:'Exceptional Q-score (0.839) indicating outstanding density-model fit — the source of all 8 label visualizations above.',
+    desc_zh:'卓越的 Q-score (0.839) 表明密度与模型的拟合极佳 —— 上方 8 通道标注图的来源条目。'},
+  {id:'EMD-62032_9K3Y', name_en:'4-Chain 10-Domain Silver', name_zh:'4 链 10 结构域银牌',
+    tier:'silver', tier_label:'🥈 Silver', tier_zh:'🥈 银牌',
+    res:'3.00 Å', cc:'CC=0.857', q:'Q=0.752', chains:4, domains:10,
+    desc_en:'Mid-resolution Silver-tier sample with strong CC despite 3 Å resolution — challenging test case for sub-optimal-resolution methods.',
+    desc_zh:'中等分辨率银牌样本，CC 较高（0.857）—— 对次优分辨率方法是有挑战性的测试样本。'},
+  {id:'EMD-74047_9ZD0', name_en:'High-CC Silver Sample', name_zh:'高 CC 银牌样本',
+    tier:'silver', tier_label:'🥈 Silver', tier_zh:'🥈 银牌',
+    res:'2.80 Å', cc:'CC=0.870', q:'Q=0.741', chains:3, domains:6,
+    desc_en:'Strong CC (0.87) at 2.8 Å resolution — compact 3-chain trimer with 6 domains.',
+    desc_zh:'2.8 Å 分辨率，强 CC (0.87) —— 紧凑的 3 链三聚体，含 6 个结构域。'}
 ];
 
-const grid = document.getElementById('gallery-grid');
-GALLERY.forEach(e => {
-  const card = document.createElement('div');
-  card.className = 'gcard';
-  card.onclick = () => openLightbox(e.id);
-  const tierColors = {gold:'#f59e0b',silver:'#94a3b8',bronze:'#b45309'};
-  card.innerHTML = `
-    <div class="gcard-img">
-      <img src="${e.base}_2_overlay.png" alt="${e.id}" loading="lazy">
-      <div class="gcard-tags">
-        <span class="gtag" style="background:${tierColors[e.tier]}33;color:${tierColors[e.tier]};border:1px solid ${tierColors[e.tier]}66">${e.tier_label}</span>
-        <span class="gtag" style="background:rgba(0,212,255,.2);color:var(--accent);border:1px solid rgba(0,212,255,.4)">${e.res}</span>
-        <span class="gtag" style="background:rgba(16,185,129,.15);color:var(--accent3);border:1px solid rgba(16,185,129,.4)">${e.cc}</span>
-      </div>
-      <div class="gcard-overlay">
-        <div class="gcard-id">${e.id}</div>
-        <div class="gcard-title en-i">${e.name_en}</div>
-        <div class="gcard-title zh-i" style="display:none">${e.name_zh}</div>
-      </div>
-    </div>
-    <div class="gcard-info">
-      <div class="gcard-meta">
-        <span>🧬 ${e.chains} chains</span>
-        <span>🧩 ${e.domains} domains</span>
-        <span style="color:var(--accent3)">→ View all 4 angles</span>
-      </div>
-      <div class="gcard-views">
-        <div class="gview-thumb" style="background-image:url('${e.base}_1_density.png')" title="Density"></div>
-        <div class="gview-thumb" style="background-image:url('${e.base}_2_overlay.png')" title="Overlay"></div>
-        <div class="gview-thumb" style="background-image:url('${e.base}_3_domains.png')" title="Domains"></div>
-        <div class="gview-thumb" style="background-image:url('${e.base}_4_chains.png')" title="Chains"></div>
-      </div>
-    </div>
-  `;
-  grid.appendChild(card);
-});
+const gridEl = document.getElementById('gallery-grid');
 
-// ═══ Lightbox ═══
-const lightbox = document.getElementById('lightbox');
-const lbContent = document.getElementById('lb-content');
-function openLightbox(entryId) {
-  const e = GALLERY.find(x => x.id === entryId);
-  if (!e) return;
+function updateGalleryCards(){
+  gridEl.innerHTML = '';
+  GALLERY.forEach(e=>{
+    const card = document.createElement('div');
+    card.className = 'gcard';
+    card.onclick = ()=>openEntryModal(e.id);
+    const tierColors = {gold:'#f59e0b',silver:'#94a3b8',bronze:'#b45309'};
+    const ZH = isZh();
+    const tierLabel = ZH ? e.tier_zh : e.tier_label;
+    const name = ZH ? e.name_zh : e.name_en;
+    const desc = ZH ? e.desc_zh : e.desc_en;
+    card.innerHTML = `
+      <div class="gcard-img">
+        <img src="assets/img/${e.id}_2_overlay.png" alt="${e.id}" loading="lazy">
+        <div class="gcard-tags">
+          <span class="gtag" style="background:${tierColors[e.tier]}33;color:${tierColors[e.tier]};border:1px solid ${tierColors[e.tier]}66">${tierLabel}</span>
+          <span class="gtag" style="background:rgba(16,185,129,.15);color:var(--accent);border:1px solid rgba(16,185,129,.4)">${e.res}</span>
+          <span class="gtag" style="background:rgba(0,212,255,.1);color:var(--accent3);border:1px solid rgba(0,212,255,.3)">${e.cc}</span>
+        </div>
+        <div class="gcard-overlay">
+          <div class="gcard-id">${e.id}</div>
+          <div class="gcard-title">${name}</div>
+        </div>
+      </div>
+      <div class="gcard-info">
+        <div class="gcard-meta">
+          <span>🧬 ${e.chains} ${ZH?'条链':'chains'}</span>
+          <span>🧩 ${e.domains} ${ZH?'结构域':'domains'}</span>
+        </div>
+        <div class="gcard-views">
+          <div class="gview-thumb" style="background-image:url('assets/img/${e.id}_1_density.png')"></div>
+          <div class="gview-thumb" style="background-image:url('assets/img/${e.id}_2_overlay.png')"></div>
+          <div class="gview-thumb" style="background-image:url('assets/img/${e.id}_3_domains.png')"></div>
+          <div class="gview-thumb" style="background-image:url('assets/img/${e.id}_4_chains.png')"></div>
+        </div>
+        <div class="gcard-cta">${ZH?'点击查看交互式 3D →':'Click to open interactive 3D →'}</div>
+      </div>
+    `;
+    gridEl.appendChild(card);
+  });
+}
+
+// ══ Entry Modal with NGL ══
+let nglStage=null, nglComp=null, nglRep='cartoon', nglColor='chainname';
+
+function openEntryModal(entryId){
+  const e = GALLERY.find(x=>x.id===entryId);
+  if(!e) return;
+  const ZH = isZh();
   const tierColors = {gold:'#f59e0b',silver:'#94a3b8',bronze:'#b45309'};
-  const isZh = document.body.classList.contains('zh-mode');
+
   const views = [
     {key:'1_density', en:'Experimental Density Map', zh:'实验密度图',
-     desc_en:'The raw cryo-EM density volume, normalized and resampled to 1.0 Å voxels.',
+     desc_en:'Raw cryo-EM volume after normalization and resampling to 1.0 Å voxels.',
      desc_zh:'原始冷冻电镜密度图，已归一化并重采样到 1.0 Å 体素。'},
     {key:'2_overlay', en:'Density + Atomic Model', zh:'密度图 + 原子模型',
-     desc_en:'Density map (translucent cyan) + atomic model CA backbone colored by chain.',
-     desc_zh:'密度图（半透明青色）+ 原子模型 CA 主链按链着色。'},
+     desc_en:'Translucent density (cyan) with atomic model CA backbone colored by chain.',
+     desc_zh:'半透明密度图（青色）+ 原子模型 CA 主链按链着色。'},
     {key:'3_domains', en:'Domain Segmentation', zh:'结构域分割',
-     desc_en:'CA atoms colored by Merizo-predicted structural domain ID, propagated across bio-assembly.',
-     desc_zh:'CA 原子按 Merizo 预测的结构域 ID 着色，已传播到完整生物组装体。'},
+     desc_en:'CA atoms colored by Merizo-predicted structural domain.',
+     desc_zh:'CA 原子按 Merizo 预测的结构域着色。'},
     {key:'4_chains', en:'Chain Assignment', zh:'链分配',
      desc_en:'CA atoms colored by chain ID, showing the bio-assembly composition.',
      desc_zh:'CA 原子按链编号着色，展示生物组装体的链组成。'}
   ];
-  lbContent.innerHTML = `
-    <div class="lb-header">
-      <div class="lb-id">${e.id}</div>
-      <div class="lb-title">${isZh ? e.name_zh : e.name_en}</div>
-      <div class="lb-subtitle">${isZh ? e.desc_zh : e.desc_en}</div>
-      <div class="lb-stats">
-        <div class="lb-stat" style="border-color:${tierColors[e.tier]}66;color:${tierColors[e.tier]}"><strong>${e.tier_label}</strong></div>
-        <div class="lb-stat">📐 <strong>${e.res}</strong></div>
-        <div class="lb-stat">✓ <strong>${e.cc}</strong></div>
-        <div class="lb-stat">🧬 <strong>${e.chains}</strong> chains</div>
-        <div class="lb-stat">🧩 <strong>${e.domains}</strong> domains</div>
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-id">${e.id}</div>
+      <div class="modal-title">${ZH?e.name_zh:e.name_en}</div>
+      <div class="modal-stats">
+        <div class="mstat" style="border-color:${tierColors[e.tier]}66;color:${tierColors[e.tier]}"><strong>${ZH?e.tier_zh:e.tier_label}</strong></div>
+        <div class="mstat">📐 <strong>${e.res}</strong></div>
+        <div class="mstat">✓ <strong>${e.cc}</strong></div>
+        <div class="mstat">🎯 <strong>${e.q}</strong></div>
+        <div class="mstat">🧬 <strong>${e.chains}</strong> ${ZH?'条链':'chains'}</div>
+        <div class="mstat">🧩 <strong>${e.domains}</strong> ${ZH?'结构域':'domains'}</div>
       </div>
     </div>
-    <div class="lb-grid">
-      ${views.map(v => `
-        <div class="lb-view">
-          <div class="lb-view-header">
-            <div class="lb-view-title">${isZh ? v.zh : v.en}</div>
-            <div class="lb-view-desc">${isZh ? v.desc_zh : v.desc_en}</div>
+
+    <!-- Interactive NGL Viewer -->
+    <div class="ngl-wrap">
+      <div class="ngl-header">
+        <span class="ngl-title">🎮 ${ZH?'交互式 3D 查看器':'Interactive 3D Viewer'}</span>
+        <span class="ngl-hint">${ZH?'拖动旋转 · 滚轮缩放 · 右键平移':'Drag to rotate · Scroll to zoom · Right-click to pan'}</span>
+      </div>
+      <div id="ngl-vp"></div>
+      <div class="ngl-controls">
+        <button class="ngl-btn active" onclick="setNglRep('cartoon')">${ZH?'卡通':'Cartoon'}</button>
+        <button class="ngl-btn" onclick="setNglRep('surface')">${ZH?'表面':'Surface'}</button>
+        <button class="ngl-btn" onclick="setNglRep('ball+stick')">${ZH?'球棍':'Ball+Stick'}</button>
+        <button class="ngl-btn" onclick="setNglRep('ribbon')">${ZH?'丝带':'Ribbon'}</button>
+        <span style="width:14px"></span>
+        <button class="ngl-btn" onclick="setNglColor('chainname')">${ZH?'🎨 按链':'🎨 By Chain'}</button>
+        <button class="ngl-btn" onclick="setNglColor('sstruc')">${ZH?'🔴 二级结构':'🔴 Sec.Struct'}</button>
+        <button class="ngl-btn" onclick="setNglColor('bfactor')">${ZH?'🌡 B-factor':'🌡 B-factor'}</button>
+      </div>
+    </div>
+
+    <!-- 4 Static Views -->
+    <div style="text-align:center;margin:30px 0 18px;color:var(--text-dim);font-size:13px;letter-spacing:1.5px">
+      ${ZH?'• 流水线 4 视图静态渲染 •':'• PIPELINE 4-VIEW STATIC RENDERS •'}
+    </div>
+    <div class="views-grid">
+      ${views.map(v=>`
+        <div class="view-card">
+          <div class="view-head">
+            <div class="view-title">${ZH?v.zh:v.en}</div>
+            <div class="view-desc">${ZH?v.desc_zh:v.desc_en}</div>
           </div>
-          <img src="${e.base}_${v.key}.png" alt="${v.key}" loading="lazy">
+          <img src="assets/img/${e.id}_${v.key}.png" alt="${v.key}" loading="lazy">
         </div>
       `).join('')}
     </div>
   `;
-  lightbox.classList.add('show');
+
+  document.getElementById('modal').classList.add('show');
   document.body.style.overflow = 'hidden';
+
+  // Load NGL with local CIF file
+  setTimeout(()=>initNgl(entryId), 100);
 }
-function closeLightbox() {
-  lightbox.classList.remove('show');
-  document.body.style.overflow = '';
-}
 
-// ═══ Label Cards ═══
-const LABS = [
-  {n:'Segment',nz:'蛋白质掩码',d:'Binary protein/background mask. Foundation for all other labels.',dz:'二值蛋白质/背景掩码，所有其他标注的基础。',grad:'linear-gradient(135deg,#001829,#003355,#00d4ff)',chip:'Binary 0/1',cc:'#00d4ff'},
-  {n:'Atom Type',nz:'原子类型',d:'CA=1 C=2 N=3 O=4 CB=5 at each voxel. Guides atomic model building.',dz:'每体素 CA/C/N/O/CB 原子类型，指导原子级模型构建。',grad:'linear-gradient(135deg,#f59e0b,#ef4444,#00d4ff,#10b981,#8b5cf6)',chip:'5 classes',cc:'#f59e0b'},
-  {n:'Amino Acid',nz:'氨基酸类型',d:'20 standard residue types at CA positions. Sequence-free residue identity.',dz:'CA 位置 20 种标准氨基酸，无需序列即可推断残基身份。',grad:'linear-gradient(135deg,#ff6b6b,#ffd700,#00ff9d,#00c8ff,#8b5cf6,#ff61c7)',chip:'20 classes',cc:'#8b5cf6'},
-  {n:'Sec. Structure',nz:'二级结构',d:'Helix (red) · Strand (blue) · Coil (purple) at CA positions.',dz:'CA 位置 α-螺旋(红)·β-折叠(蓝)·无规则卷曲(紫)。',grad:'linear-gradient(to right,#ef4444 33%,#00d4ff 33% 66%,#8b5cf6 66%)',chip:'3 classes',cc:'#ef4444'},
-  {n:'Q-Score',nz:'Q-score',d:'Per-atom density fit confidence (Pintilie 2020). High = well-resolved.',dz:'逐原子密度拟合置信度（Pintilie 2020），高值代表原子分辨清晰。',grad:'linear-gradient(to right,#030810,#003,#006699,#00d4ff,#fff)',chip:'Float [0,1]',cc:'#10b981'},
-  {n:'Chain ID',nz:'链编号',d:'Chain identity for each residue. Critical for oligomeric assemblies.',dz:'每残基链编号，对寡聚体和对称组装体至关重要。',grad:'linear-gradient(135deg,#ef4444,#f59e0b,#10b981,#00d4ff,#8b5cf6,#ec4899)',chip:'N chains',cc:'#00d4ff'},
-  {n:'Domain',nz:'结构域',d:'Structural domain IDs from Merizo, propagated across assembly copies.',dz:'Merizo 结构域 ID，传播到生物组装体所有副本。',grad:'linear-gradient(135deg,#ef4444,#10b981,#f59e0b,#8b5cf6,#00d4ff,#ec4899,#a78bfa)',chip:'M domains',cc:'#10b981'},
-  {n:'Interface',nz:'界面',d:'Protein-protein interface residues (cross-chain CA-CA < 5 Å).',dz:'蛋白质-蛋白质界面残基（跨链 CA-CA < 5 Å）。',grad:'linear-gradient(to right,#030810 40%,#f59e0b)',chip:'Binary 0/1',cc:'#f59e0b'}
-];
-const lg=document.getElementById('lg');
-LABS.forEach(lb=>{
-  const d=document.createElement('div');d.className='lc';
-  const h=document.createElement('div');h.className='lih';
-  const cv=document.createElement('canvas');cv.width=210;cv.height=120;
-  const ct=cv.getContext('2d');
-  const gr=ct.createLinearGradient(0,0,210,0);
-  const hex=lb.grad.match(/#[0-9a-f]+/gi)||['#001829','#00d4ff'];
-  hex.forEach((c,i)=>gr.addColorStop(i/(hex.length-1||1),c));
-  ct.fillStyle=gr;ct.fillRect(0,0,210,120);
-  for(let i=0;i<50;i++){ct.beginPath();ct.arc(Math.random()*210,Math.random()*120,Math.random()*2.5+.5,0,Math.PI*2);ct.fillStyle='rgba(255,255,255,'+(Math.random()*.25)+')';ct.fill();}
-  for(let x=0;x<210;x+=10)for(let y=0;y<120;y+=10){if(Math.random()>.7){ct.fillStyle='rgba(255,255,255,'+(Math.random()*.1)+')';ct.fillRect(x,y,9,9);}}
-  h.appendChild(cv);
-  const ov=document.createElement('div');ov.className='lov';
-  h.appendChild(ov);
-  d.innerHTML=`<div class="lb_b"><div class="ln">${lb.n} <span style="color:var(--text-dim);font-weight:400">/</span> ${lb.nz}</div><div class="ld en">${lb.d}</div><div class="ld zh" style="display:none">${lb.dz}</div><span class="lchip" style="background:${lb.cc}22;color:${lb.cc}">${lb.chip}</span></div>`;
-  d.insertBefore(h,d.firstChild);
-  lg.appendChild(d);
-});
-
-// ═══ Pipeline ═══
-const STEPS=[
-  {n:'01',ic:'⬇️',t:'Retrieval',tz:'数据下载',d:'EMDB FTP density map + RCSB PDB atomic model.',dz:'EMDB FTP 密度图 + RCSB PDB 原子模型。',tool:'requests'},
-  {n:'02',ic:'🔄',t:'Resampling',tz:'重采样',d:'scipy zoom → uniform 1.0 Å/voxel.',dz:'scipy zoom 重采样至 1.0 Å/voxel。',tool:'scipy'},
-  {n:'03',ic:'📊',t:'Normalization',tz:'归一化',d:'98th-percentile on non-zero voxels.',dz:'非零体素 98 百分位归一化。',tool:'numpy'},
-  {n:'04',ic:'🔬',t:'Alignment QC',tz:'对齐质控',d:'PHENIX map_model_cc → CC_mask, CC_volume, CC_peaks. Pintilie Q-score per atom.',dz:'PHENIX map_model_cc → CC_mask 等指标。Pintilie 逐原子 Q-score。',tool:'PHENIX 2.0'},
-  {n:'05',ic:'🧩',t:'Domain Segmentation',tz:'结构域分割',d:'Merizo per-chain → propagated to bio-assembly copies.',dz:'Merizo 逐链分割 → 传播到生物组装体副本。',tool:'Merizo'},
-  {n:'06',ic:'🏷️',t:'Voxel Labeling',tz:'体素标注',d:'3 KDTree groups → 8 channels of voxel labels.',dz:'三组 KDTree → 8 通道体素标注。',tool:'gemmi'},
-  {n:'07',ic:'✨',t:'Simulated Density',tz:'模拟密度',d:'ChimeraX molmap → ideal noiseless density.',dz:'ChimeraX molmap 生成理想无噪声密度。',tool:'ChimeraX 1.11'},
-  {n:'08',ic:'🏆',t:'Tier Classification',tz:'质量分级',d:'Gold/Silver/Bronze/Reject based on CC + Q-score.',dz:'按 CC + Q-score 分 Gold/Silver/Bronze/Reject。',tool:'Classifier'}
-];
-const pg=document.getElementById('pg');
-STEPS.forEach(s=>{
-  pg.innerHTML+=`<div class="pc"><div class="pn">STEP ${s.n}</div><div class="pi">${s.ic}</div><div class="pt">${s.t} <span style="color:var(--text-dim);font-weight:400">/ ${s.tz}</span></div><div class="pd en">${s.d}</div><div class="pd zh" style="display:none">${s.dz}</div><span class="ptool">${s.tool}</span></div>`;
-});
-
-// ═══ Research Directions (PLACEHOLDER - will be populated by agent results) ═══
-const RESEARCH = window.__RESEARCH_DATA__ = [
-  {
-    id: 'model_building',
-    icon: '🏗️',
-    tag: 'Direction 1',
-    title_en: 'De Novo Atomic Model Building from Density',
-    title_zh: '从密度图直接构建原子模型',
-    desc_en: 'Train models that directly produce atomic coordinates from cryo-EM density maps — bypassing the manual fitting bottleneck.',
-    desc_zh: '训练模型直接从冷冻电镜密度图产生原子坐标 —— 跳过人工拟合瓶颈。',
-    projects: []  // To be filled
-  },
-  {
-    id: 'denoising',
-    icon: '🔇',
-    tag: 'Direction 2',
-    title_en: 'Map Denoising & Resolution Enhancement',
-    title_zh: '密度图去噪与分辨率增强',
-    desc_en: 'Use our paired experimental + simulated density data as the first true "noisy/clean" supervised training signal for cryo-EM.',
-    desc_zh: '用配对的实验+模拟密度图作为首个真正的"noisy/clean"监督训练信号。',
-    projects: []
-  },
-  {
-    id: 'interface',
-    icon: '🧬',
-    tag: 'Direction 3',
-    title_en: 'Interface & Assembly Prediction',
-    title_zh: '蛋白质界面与组装体预测',
-    desc_en: 'Predict protein-protein interfaces and oligomeric states directly from density maps — without requiring atomic models first.',
-    desc_zh: '直接从密度图预测蛋白质界面和寡聚态 —— 无需先建原子模型。',
-    projects: []
-  },
-  {
-    id: 'domain_fold',
-    icon: '🧩',
-    tag: 'Direction 4',
-    title_en: 'Density-Based Domain & Fold Discovery',
-    title_zh: '基于密度的结构域与折叠发现',
-    desc_en: 'A new paradigm: domain segmentation, fold recognition, and SS prediction directly from cryo-EM density.',
-    desc_zh: '新范式：直接从冷冻电镜密度做结构域分割、折叠识别、二级结构预测。',
-    projects: []
-  },
-  {
-    id: 'foundation',
-    icon: '🌐',
-    tag: 'Direction 5',
-    title_en: 'Cryo-EM Foundation Model & QC',
-    title_zh: '冷冻电镜大模型与质量评估',
-    desc_en: 'Build the first 3D foundation model for cryo-EM, and train unified AI validators that surpass PHENIX-style multi-tool ensembles.',
-    desc_zh: '构建首个冷冻电镜 3D 大模型，训练统一 AI 验证器超越 PHENIX 组合判断。',
-    projects: []
+function initNgl(entryId){
+  if(!nglStage){
+    nglStage = new NGL.Stage('ngl-vp', {backgroundColor:'#0a1220', quality:'medium', ambientIntensity:0.5, lightIntensity:0.9});
+  } else {
+    nglStage.removeAllComponents();
+    // Re-bind viewport
+    const vp = document.getElementById('ngl-vp');
+    if(vp) nglStage.viewer.container = vp;
   }
+  // Reset state
+  nglRep = 'cartoon';
+  nglColor = 'chainname';
+
+  nglStage.loadFile('assets/cif/'+entryId+'.cif', {defaultRepresentation:false}).then(c=>{
+    nglComp = c;
+    applyNglRep();
+    c.autoView();
+    nglStage.setSpin([0,1,0], 0.003);
+  }).catch(err=>{
+    console.error('NGL load failed:', err);
+    document.getElementById('ngl-vp').innerHTML = '<div style="color:#ef4444;padding:30px;text-align:center">3D viewer failed to load. Please check your browser supports WebGL.</div>';
+  });
+}
+
+function applyNglRep(){
+  if(!nglComp) return;
+  nglComp.removeAllRepresentations();
+  const CHAIN_COLS = [0x10b981, 0x00d4ff, 0x8b5cf6, 0xf59e0b, 0xef4444, 0xec4899, 0x06b6d4, 0xa78bfa, 0xfde047, 0xf97316];
+  const sc = NGL.ColormakerRegistry.addScheme(function(){
+    this.atomColor = function(a){
+      if(nglColor==='chainname') return CHAIN_COLS[a.chainIndex % CHAIN_COLS.length];
+      if(nglColor==='sstruc'){
+        if(a.sstruc==='h') return 0xef4444;
+        if(a.sstruc==='s') return 0x00d4ff;
+        return 0x8b5cf6;
+      }
+      if(nglColor==='bfactor'){
+        const v = Math.min(1, a.bfactor / 100);
+        return ((Math.floor(v*255))<<16) | (Math.floor((1-v)*128)<<8) | Math.floor((1-v)*255);
+      }
+      return 0x10b981;
+    };
+  });
+  nglComp.addRepresentation(nglRep, {colorScheme: sc, roughness:0.5, metalness:0.1});
+}
+
+window.setNglRep = function(r){
+  nglRep = r;
+  document.querySelectorAll('.ngl-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(r.toLowerCase().split('+')[0]) || (r==='ribbon' && b.textContent.includes('Ribbon')) || (r==='ribbon' && b.textContent.includes('丝带')));
+  });
+  applyNglRep();
+};
+window.setNglColor = function(c){
+  nglColor = c;
+  applyNglRep();
+};
+window.openEntryModal = openEntryModal;
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  document.body.style.overflow = '';
+  if(nglStage){ nglStage.removeAllComponents(); }
+}
+window.closeModal = closeModal;
+
+// ══ Label Cards (REAL images, 4x2) ══
+const LABS = [
+  {n_en:'Segment', n_zh:'蛋白质掩码', d_en:'Binary protein/background mask — foundation for all other labels.', d_zh:'二值蛋白质/背景掩码，所有其他标注的基础。', chip:'0/1', cc:'#00d4ff', img:'label_1_segment.png'},
+  {n_en:'Atom Type', n_zh:'原子类型', d_en:'CA · C · N · O · CB at each voxel — guides atomic model building.', d_zh:'每体素 CA/C/N/O/CB 原子类型，指导原子级模型构建。', chip:'5 classes', chip_zh:'5 类', cc:'#f59e0b', img:'label_2_atom.png'},
+  {n_en:'Amino Acid', n_zh:'氨基酸类型', d_en:'20 residue types at CA positions — sequence-free residue identity.', d_zh:'CA 位置 20 种氨基酸类型，无需序列即可推断残基身份。', chip:'20 classes', chip_zh:'20 类', cc:'#8b5cf6', img:'label_3_aa.png'},
+  {n_en:'Sec. Structure', n_zh:'二级结构', d_en:'Helix · Strand · Coil at CA positions — direct topology from density.', d_zh:'CA 位置 α-螺旋 / β-折叠 / 无规则卷曲，直接从密度获得拓扑。', chip:'3 classes', chip_zh:'3 类', cc:'#ef4444', img:'label_4_ss.png'},
+  {n_en:'Q-Score', n_zh:'Q-score', d_en:'Per-atom density fit confidence (Pintilie 2020) — heatmap visualization.', d_zh:'每原子密度拟合置信度（Pintilie 2020）—— 热图可视化。', chip:'Float [0,1]', chip_zh:'浮点 [0,1]', cc:'#10b981', img:'label_5_qscore.png'},
+  {n_en:'Chain ID', n_zh:'链编号', d_en:'Chain identity per residue — critical for oligomeric assemblies.', d_zh:'每残基链编号，对寡聚体和对称组装体至关重要。', chip:'N chains', chip_zh:'N 条链', cc:'#00d4ff', img:'label_6_chain.png'},
+  {n_en:'Domain', n_zh:'结构域', d_en:'Structural domain IDs from Merizo — propagated across bio-assembly.', d_zh:'Merizo 结构域 ID，已传播到生物组装体所有副本。', chip:'M domains', chip_zh:'M 个域', cc:'#10b981', img:'label_7_domain.png'},
+  {n_en:'Interface', n_zh:'界面', d_en:'Protein-protein interface residues highlighted (CA-CA < 5 Å cross-chain).', d_zh:'蛋白质-蛋白质界面残基（跨链 CA-CA < 5 Å），高亮显示。', chip:'0/1', cc:'#f59e0b', img:'label_8_interface.png'}
 ];
 
-const rg = document.getElementById('research-grid');
-RESEARCH.forEach(r => {
-  const c = document.createElement('div');
-  c.className = 'rcard';
-  c.onclick = () => openResearchModal(r.id);
-  c.innerHTML = `
-    <div class="ricon">${r.icon}</div>
-    <span class="rtag">${r.tag}</span>
-    <div class="rtitle en">${r.title_en}</div>
-    <div class="rtitle zh" style="display:none">${r.title_zh}</div>
-    <div class="rtitle-zh en">${r.title_zh}</div>
-    <div class="rtitle-zh zh" style="display:none">${r.title_en}</div>
-    <div class="rdesc en">${r.desc_en}</div>
-    <div class="rdesc zh" style="display:none">${r.desc_zh}</div>
-    <span class="rcount" id="rcount-${r.id}">Loading projects...</span>
-  `;
-  rg.appendChild(c);
-});
+function updateLabelCards(){
+  const lg = document.getElementById('labels-grid');
+  if(!lg) return;
+  const ZH = isZh();
+  lg.innerHTML = '';
+  LABS.forEach(lb=>{
+    const c = document.createElement('div'); c.className = 'label-card';
+    c.innerHTML = `
+      <img class="label-img" src="assets/img/${lb.img}" alt="${lb.n_en}" loading="lazy">
+      <div class="label-body">
+        <div class="label-name">${ZH ? lb.n_zh : lb.n_en}</div>
+        <div class="label-desc">${ZH ? lb.d_zh : lb.d_en}</div>
+        <span class="label-chip" style="background:${lb.cc}22;color:${lb.cc}">${ZH ? (lb.chip_zh || lb.chip) : lb.chip}</span>
+      </div>
+    `;
+    lg.appendChild(c);
+  });
+}
 
-// ═══ Project Modal ═══
-const pmodal = document.getElementById('pmodal');
-const pmContent = document.getElementById('pmodal-content');
+// ══ Pipeline ══
+const STEPS = [
+  {n:'01', ic:'⬇️', t_en:'Retrieval', t_zh:'数据下载', d_en:'EMDB FTP density map + RCSB PDB atomic model.', d_zh:'EMDB FTP 密度图 + RCSB PDB 原子模型。', tool:'requests'},
+  {n:'02', ic:'🔄', t_en:'Resampling', t_zh:'重采样', d_en:'scipy zoom → uniform 1.0 Å/voxel.', d_zh:'scipy zoom 重采样至 1.0 Å/voxel。', tool:'scipy'},
+  {n:'03', ic:'📊', t_en:'Normalization', t_zh:'归一化', d_en:'98th-percentile on non-zero voxels.', d_zh:'非零体素 98 百分位归一化。', tool:'numpy'},
+  {n:'04', ic:'🔬', t_en:'Alignment QC', t_zh:'对齐质控', d_en:'PHENIX map_model_cc → CC metrics + Pintilie Q-score.', d_zh:'PHENIX map_model_cc → CC 指标 + Pintilie Q-score。', tool:'PHENIX 2.0'},
+  {n:'05', ic:'🧩', t_en:'Domain Segmentation', t_zh:'结构域分割', d_en:'Merizo per-chain → propagated to bio-assembly copies.', d_zh:'Merizo 逐链分割 → 传播到生物组装体副本。', tool:'Merizo'},
+  {n:'06', ic:'🏷️', t_en:'Voxel Labeling', t_zh:'体素标注', d_en:'3 KDTree groups → 8 channels of voxel labels.', d_zh:'三组 KDTree → 8 通道体素标注。', tool:'gemmi'},
+  {n:'07', ic:'✨', t_en:'Simulated Density', t_zh:'模拟密度', d_en:'ChimeraX molmap → ideal noiseless density.', d_zh:'ChimeraX molmap 生成理想无噪声密度。', tool:'ChimeraX 1.11'},
+  {n:'08', ic:'🏆', t_en:'Tier Classification', t_zh:'质量分级', d_en:'Gold / Silver / Bronze / Reject by CC + Q-score.', d_zh:'按 CC + Q-score 分 Gold / Silver / Bronze / Reject。', tool:'Classifier'}
+];
 
-function openResearchModal(directionId) {
-  const r = RESEARCH.find(x => x.id === directionId);
-  if (!r) return;
-  const isZh = document.body.classList.contains('zh-mode');
-  const langTitle = isZh ? r.title_zh : r.title_en;
-  const langSubtitle = isZh ? r.desc_zh : r.desc_en;
+function updatePipelineCards(){
+  const pg = document.getElementById('pg');
+  if(!pg) return;
+  const ZH = isZh();
+  pg.innerHTML = '';
+  STEPS.forEach(s=>{
+    pg.innerHTML += `<div class="pc">
+      <div class="pn">${ZH ? '步骤' : 'STEP'} ${s.n}</div>
+      <div class="pi">${s.ic}</div>
+      <div class="pt">${ZH ? s.t_zh : s.t_en}</div>
+      <div class="pd">${ZH ? s.d_zh : s.d_en}</div>
+      <span class="ptool">${s.tool}</span>
+    </div>`;
+  });
+}
+
+// ══ Research ══
+const RESEARCH = [
+  {id:'model_building', icon:'🏗️', tag_en:'Direction 1', tag_zh:'方向一',
+   title_en:'De Novo Atomic Model Building from Density', title_zh:'从密度图直接构建原子模型',
+   desc_en:'Train models that directly produce atomic coordinates from cryo-EM density — bypassing the manual fitting bottleneck and breaking ModelAngelo\'s data ceiling (700 → 11K pairs).',
+   desc_zh:'训练模型直接从冷冻电镜密度产生原子坐标 —— 跳过人工拟合瓶颈，突破 ModelAngelo 的数据上限（700 → 11K 配对）。'},
+  {id:'denoising', icon:'🔇', tag_en:'Direction 2', tag_zh:'方向二',
+   title_en:'Map Denoising & Resolution Enhancement', title_zh:'密度图去噪与分辨率增强',
+   desc_en:'Our paired noisy/clean density data is the first true supervised signal for cryo-EM denoising, breaking the Noise2Noise paradigm.',
+   desc_zh:'我们的配对 noisy/clean 密度数据是冷冻电镜去噪首个真正的监督信号，打破 Noise2Noise 范式。'},
+  {id:'interface', icon:'🧬', tag_en:'Direction 3', tag_zh:'方向三',
+   title_en:'Interface & Assembly Prediction', title_zh:'蛋白质界面与组装体预测',
+   desc_en:'First-ever method to predict protein-protein interfaces and oligomeric states directly from density — no atomic model needed.',
+   desc_zh:'首个直接从密度图预测蛋白-蛋白界面和寡聚态的方法 —— 完全无需原子模型。'},
+  {id:'domain_fold', icon:'🧩', tag_en:'Direction 4', tag_zh:'方向四',
+   title_en:'Density-Based Domain & Fold Discovery', title_zh:'基于密度的结构域与折叠发现',
+   desc_en:'A new paradigm: domain segmentation, fold recognition, and SS prediction directly from cryo-EM density (Merizo currently requires atomic models).',
+   desc_zh:'新范式：直接从冷冻电镜密度做结构域分割、折叠识别、二级结构预测（Merizo 目前需要原子模型）。'},
+  {id:'foundation', icon:'🌐', tag_en:'Direction 5', tag_zh:'方向五',
+   title_en:'Cryo-EM Foundation Model & QC', title_zh:'冷冻电镜大模型与质量评估',
+   desc_en:'Build the first 3D cryo-EM foundation model (Cryo-IEF is 2D-only) and unified AI validators 22× larger than DeepQs.',
+   desc_zh:'构建首个 3D 冷冻电镜基础模型（Cryo-IEF 仅是 2D），统一 AI 验证器比 DeepQs 大 22 倍。'}
+];
+
+function updateResearchCards(){
+  const rg = document.getElementById('research-grid');
+  if(!rg) return;
+  const ZH = isZh();
+  rg.innerHTML = '';
+  RESEARCH.forEach(r=>{
+    const c = document.createElement('div'); c.className = 'rcard';
+    c.onclick = ()=>openResearchModal(r.id);
+    c.innerHTML = `
+      <div class="ricon">${r.icon}</div>
+      <span class="rtag">${ZH ? r.tag_zh : r.tag_en}</span>
+      <div class="rtitle">${ZH ? r.title_zh : r.title_en}</div>
+      <div class="rdesc">${ZH ? r.desc_zh : r.desc_en}</div>
+      <span class="rcount" id="rcount-${r.id}"></span>
+    `;
+    rg.appendChild(c);
+  });
+}
+
+function updateProjectCounts(){
+  const ZH = isZh();
+  RESEARCH.forEach(r=>{
+    const el = document.getElementById('rcount-'+r.id);
+    if(!el) return;
+    const data = window.RESEARCH_DATA && window.RESEARCH_DATA[r.id];
+    const n = data ? data.length : 0;
+    el.innerHTML = n > 0
+      ? (ZH ? `→ 查看 ${n} 个具体项目` : `→ Explore ${n} concrete projects`)
+      : (ZH ? '项目准备中…' : 'Projects coming soon…');
+  });
+}
+
+// ══ Research Project Modal ══
+function openResearchModal(directionId){
+  const r = RESEARCH.find(x=>x.id===directionId);
+  if(!r) return;
+  const ZH = isZh();
+  const projects = (window.RESEARCH_DATA && window.RESEARCH_DATA[directionId]) || [];
 
   let projsHtml = '';
-  if (r.projects && r.projects.length > 0) {
-    projsHtml = '<div class="project-list">' + r.projects.map((p, idx) => `
+  if(projects.length > 0){
+    projsHtml = '<div class="project-list">' + projects.map((p,idx)=>`
       <div class="proj" id="proj-${r.id}-${idx}">
         <div class="proj-header" onclick="toggleProject('${r.id}', ${idx})">
           <div class="proj-info">
-            <div class="proj-num">PROJECT ${String(idx+1).padStart(2,'0')}</div>
-            <div class="proj-name">${isZh ? (p.title_zh || p.title_en) : p.title_en}</div>
-            <div class="proj-summary">${isZh ? (p.summary_zh || p.summary_en) : p.summary_en}</div>
+            <div class="proj-num">${ZH?'项目':'PROJECT'} ${String(idx+1).padStart(2,'0')}</div>
+            <div class="proj-name">${ZH ? (p.title_zh || p.title_en) : p.title_en}</div>
+            <div class="proj-summary">${ZH ? (p.summary_zh || p.summary_en) : p.summary_en}</div>
           </div>
           <div class="proj-toggle">+</div>
         </div>
         <div class="proj-body">
-          ${p.problem ? `<div class="proj-section"><div class="proj-section-title">📌 ${isZh?'问题陈述':'Problem Statement'}</div><div class="proj-section-content">${isZh ? p.problem_zh || p.problem : p.problem}</div></div>` : ''}
-          ${p.approach ? `<div class="proj-section"><div class="proj-section-title">💡 ${isZh?'技术方案':'Approach'}</div><div class="proj-section-content">${isZh ? p.approach_zh || p.approach : p.approach}</div></div>` : ''}
-          ${p.evaluation ? `<div class="proj-section"><div class="proj-section-title">📊 ${isZh?'评估方案':'Evaluation'}</div><div class="proj-section-content">${isZh ? p.evaluation_zh || p.evaluation : p.evaluation}</div></div>` : ''}
-          ${p.publication ? `<div class="proj-section"><div class="proj-section-title">🏆 ${isZh?'预期发表':'Publication Target'}</div><div class="proj-section-content">${isZh ? p.publication_zh || p.publication : p.publication}</div></div>` : ''}
-          ${p.risks ? `<div class="proj-section"><div class="proj-section-title">⚠️ ${isZh?'风险与挑战':'Risks'}</div><div class="proj-section-content">${isZh ? p.risks_zh || p.risks : p.risks}</div></div>` : ''}
-          ${p.tags && p.tags.length ? `<div class="proj-tier">${p.tags.map(t => `<span class="proj-tier-item">${t}</span>`).join('')}</div>` : ''}
+          ${p.problem ? `<div class="proj-section"><div class="proj-section-title">📌 ${ZH?'问题陈述':'Problem Statement'}</div><div class="proj-section-content">${ZH ? (p.problem_zh || p.problem) : p.problem}</div></div>` : ''}
+          ${p.approach ? `<div class="proj-section"><div class="proj-section-title">💡 ${ZH?'技术方案':'Approach'}</div><div class="proj-section-content">${ZH ? (p.approach_zh || p.approach) : p.approach}</div></div>` : ''}
+          ${p.evaluation ? `<div class="proj-section"><div class="proj-section-title">📊 ${ZH?'评估方案':'Evaluation'}</div><div class="proj-section-content">${ZH ? (p.evaluation_zh || p.evaluation) : p.evaluation}</div></div>` : ''}
+          ${p.publication ? `<div class="proj-section"><div class="proj-section-title">🏆 ${ZH?'预期发表':'Publication Target'}</div><div class="proj-section-content">${ZH ? (p.publication_zh || p.publication) : p.publication}</div></div>` : ''}
+          ${p.risks ? `<div class="proj-section"><div class="proj-section-title">⚠️ ${ZH?'风险与挑战':'Risks'}</div><div class="proj-section-content">${ZH ? (p.risks_zh || p.risks) : p.risks}</div></div>` : ''}
+          ${p.tags && p.tags.length ? `<div class="proj-tier">${p.tags.map(t=>`<span class="proj-tier-item">${t}</span>`).join('')}</div>` : ''}
         </div>
       </div>
     `).join('') + '</div>';
   } else {
-    projsHtml = `
-      <div style="text-align:center;padding:40px;color:var(--text-dim)">
-        <div style="font-size:3rem;margin-bottom:20px">⏳</div>
-        <div>${isZh ? '具体项目计划书正在准备中...' : 'Detailed project plans are being prepared...'}</div>
-      </div>
-    `;
+    projsHtml = `<div style="text-align:center;padding:40px;color:var(--text-dim)">
+      <div style="font-size:3rem;margin-bottom:20px">⏳</div>
+      <div>${ZH ? '项目计划书准备中...' : 'Project plans being prepared...'}</div>
+    </div>`;
   }
 
-  pmContent.innerHTML = `
+  document.getElementById('pmodal-content').innerHTML = `
     <div class="pm-header">
-      <div class="pm-cat">${r.tag} ${r.icon}</div>
-      <div class="pm-title">${langTitle}</div>
-      <div class="pm-subtitle">${langSubtitle}</div>
+      <div class="pm-cat">${ZH?r.tag_zh:r.tag_en} ${r.icon}</div>
+      <div class="pm-title">${ZH ? r.title_zh : r.title_en}</div>
+      <div class="pm-subtitle">${ZH ? r.desc_zh : r.desc_en}</div>
     </div>
     ${projsHtml}
   `;
-  pmodal.classList.add('show');
+  document.getElementById('pmodal').classList.add('show');
   document.body.style.overflow = 'hidden';
 }
-
-function closeModal() {
-  pmodal.classList.remove('show');
+function closePModal(){
+  document.getElementById('pmodal').classList.remove('show');
   document.body.style.overflow = '';
 }
-
-function toggleProject(rid, idx) {
+window.closePModal = closePModal;
+window.openResearchModal = openResearchModal;
+function toggleProject(rid, idx){
   const el = document.getElementById(`proj-${rid}-${idx}`);
-  if (el) el.classList.toggle('open');
+  if(el) el.classList.toggle('open');
 }
-
-// Update project counts
-function updateProjectCounts() {
-  RESEARCH.forEach(r => {
-    const el = document.getElementById(`rcount-${r.id}`);
-    if (el) {
-      const n = r.projects.length;
-      el.textContent = document.body.classList.contains('zh-mode')
-        ? (n > 0 ? `查看 ${n} 个具体项目` : '项目准备中...')
-        : (n > 0 ? `Explore ${n} concrete projects` : 'Projects coming soon...');
-    }
-  });
-}
-updateProjectCounts();
+window.toggleProject = toggleProject;
 
 // ESC closes modals
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeLightbox(); closeModal(); }
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape'){ closeModal(); closePModal(); }
 });
 
-// Load research data (now guaranteed to be loaded since research-data.js is above)
-if (window.RESEARCH_DATA) {
-  Object.keys(window.RESEARCH_DATA).forEach(id => {
-    const r = RESEARCH.find(x => x.id === id);
-    if (r) r.projects = window.RESEARCH_DATA[id];
-  });
-  updateProjectCounts();
-  console.log('Research data loaded:', Object.keys(window.RESEARCH_DATA).length, 'directions');
-} else {
-  console.warn('window.RESEARCH_DATA not found — research-data.js may have failed to load');
-}
+// Initial render
+updateGalleryCards();
+updateLabelCards();
+updatePipelineCards();
+updateResearchCards();
+updateProjectCounts();
 </script>
-
-<!-- (research-data.js is loaded above before main script) -->
-
-
 </body>
 </html>
