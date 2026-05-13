@@ -28,6 +28,10 @@ window.RESEARCH_DATA = {
 
       risks: `<ul><li><strong>风险 1</strong>：4-6 Å 区间噪声太大，原子级标签可能不够准 → 缓解：用 <code>label_qscore</code> 加权，配合 ChimeraX 模拟密度做辅助监督</li><li><strong>风险 2</strong>：SE(3)-equivariant 网络训练慢 → 缓解：先用普通 3D U-Net 验证可行性，再换 equivariant</li><li><strong>风险 3</strong>：和 ModelAngelo 的 GNN 后处理对比，可能需要类似的图优化步骤</li></ul>`,
       risks_zh: `<ul><li><strong>风险 1</strong>：4-6 Å 区间噪声大，原子级标签可能不够准 → 缓解：用 <code>label_qscore</code> 加权，配合 ChimeraX 模拟密度做辅助监督</li><li><strong>风险 2</strong>：SE(3)-等价网络训练慢 → 缓解：先用普通 3D U-Net 验证可行性，再换等价版本</li><li><strong>风险 3</strong>：可能需要类似 ModelAngelo 的 GNN 后处理步骤</li></ul>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> ModelAngelo's <em>~700 training pairs</em> (Jamali, Nature 2024) cap performance below 4 Å. Cryo2Struct2Data (Giri 2024) and the 2025 ScienceDirect labeled dataset (650 maps) lack <em>resolution-binned Q-score truth</em>, which is essential for the resolution token + curriculum learning strategy. Plan A is the <strong>first dataset with PHENIX-graded Gold/Silver/Bronze tiers across the full 1-6 Å range</strong>, enabling a single model to span all resolutions.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：ModelAngelo 的 <em>~700 训练对</em>（Jamali, Nature 2024）让它在 4 Å 以下失效。Cryo2Struct2Data (Giri 2024) 和 2025 ScienceDirect 标注数据集（650 个 map）<em>没有分辨率分档的 Q-score 真值</em>，而这正是分辨率 token + 课程学习策略的必需。Plan A 是<strong>首个在 1-6 Å 全范围都有 PHENIX 严格分级（Gold/Silver/Bronze）的数据集</strong>，使单一模型能跨越全分辨率。`,
+      impact: `<strong>If successful:</strong> Every cryo-EM lab can build atomic models at intermediate resolution (~30% of EMDB entries, currently unmodellable), unlocking thousands of biologically important complexes that have been frozen in 4-6 Å limbo for years.`,
+      impact_zh: `<strong>如果成功</strong>：每个冷冻电镜实验室都能在中等分辨率构建原子模型（占 EMDB 约 30% 的条目，目前无法建模），释放数千个被卡在 4-6 Å 多年的重要生物学复合物。`,
 
       tags: ['Diffusion Model', 'SE(3)-Equivariant', 'Resolution-Aware', '6-9 person-months', 'Nature Methods']
     },
@@ -52,6 +56,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>主要风险：低分辨率下相似残基难区分（生物学上限）。缓解：把它定位为"提供 top-k 候选 + 不确定性分数"，而非强制单一预测。这样下游 HMM 搜索仍可发挥作用。</p>`,
       risks_zh: `<p>主要风险：低分辨率下相似残基难区分（生物学上限）。缓解：定位为"提供 top-k 候选 + 不确定性分数"，而非强制单一预测，下游 HMM 搜索仍能发挥作用。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> ModelAngelo's residue identifier requires sequence databases for HMM search, failing on unknown proteins, PTMs, and metaproteomics samples. No public dataset provides <em>large-scale (density_patch ↔ residue_class)</em> supervised pairs — only PDB-deposited models have this paired data, and only Plan A has extracted it at scale across <strong>11K bio-assemblies × ~1000 residues = 11M training patches</strong>.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：ModelAngelo 的残基识别器需要序列数据库做 HMM 搜索，遇到未知蛋白、PTM、宏蛋白质组样品就失效。没有公开数据集提供<em>大规模（密度块 ↔ 残基类别）</em>监督对——只有 PDB 沉积模型有这种配对数据，只有 Plan A 在 <strong>11K 生物组装体 × 每个 ~1000 残基 = 1100 万训练 patch</strong>上提取了它。`,
+      impact: `<strong>If successful:</strong> Enables sequence-free protein identification in environmental and clinical cryo-EM samples — a long-standing demand in metaproteomics, microbiome research, and pathogen detection where novel proteins lack sequence databases.`,
+      impact_zh: `<strong>如果成功</strong>：使环境样品和临床冷冻电镜样品的<em>无序列蛋白质识别</em>成为可能——这是宏蛋白质组学、微生物组研究、病原体检测中长期需求，这些场景的新蛋白没有序列库。`,
 
       tags: ['3D ViT', 'Contrastive Learning', 'Plug-in to ModelAngelo', '3-4 person-months', 'Nature Communications']
     },
@@ -76,6 +84,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>主要风险：低分辨率下 CA 位置本身不精确，"链分配"可能 ambiguous。缓解：输出多个候选 + 置信度，让下游 fitting 步骤选择。</p>`,
       risks_zh: `<p>主要风险：低分辨率下 CA 位置本身不精确，"链分配"可能模糊。缓解：输出多候选 + 置信度，让下游 fitting 步骤选择。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> DEMO-EM (Zhang, Nat Comput Sci 2022) and DiffModeler (PMC 2024) both require AlphaFold predicted models as priors — useless when sequence is unknown or AF fails. Plan A's <em>label_chain + label_segment</em> at 4-8 Å (via Q-score-weighted training on Bronze tier) enables chain-aware backbone tracing <strong>without any prior model</strong> — a capability that no existing dataset supports.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：DEMO-EM (Zhang, Nat Comput Sci 2022) 和 DiffModeler (PMC 2024) 都需要 AlphaFold 预测模型做先验——序列未知或 AF 失败时就废。Plan A 在 4-8 Å 范围的 <em>label_chain + label_segment</em>（通过 Q-score 加权 Bronze 档训练）使<strong>无任何先验模型</strong>的链感知骨架追踪成为可能——任何现有数据集都不支持。`,
+      impact: `<strong>If successful:</strong> Unlocks atomic interpretation of ~30% of EMDB entries currently below 4 Å resolution — including many ribosomes in translation, membrane complexes, large viral capsids that have <em>never received atomic models</em>.`,
+      impact_zh: `<strong>如果成功</strong>：解锁 EMDB 中约 30% 分辨率低于 4 Å 条目的原子级解读——包括很多翻译中的核糖体、膜复合物、大病毒衣壳，它们<em>从未获得过原子模型</em>。`,
 
       tags: ['Backbone Tracing', 'Multi-Chain', '4-6 person-months', 'Nature Communications']
     },
@@ -100,6 +112,10 @@ window.RESEARCH_DATA = {
 
       risks: `<ul><li>自回归序列生成在 3D 输入上不稳定 → 用 non-autoregressive 解码器</li><li>训练成本高 → 用 LoRA-style 微调或先做小规模 proof-of-concept</li><li>评测复杂 → 分阶段：先证 SS 准确，再加 aa，最后联合</li></ul>`,
       risks_zh: `<ul><li>自回归序列生成在 3D 输入上不稳定 → 用非自回归解码器</li><li>训练成本高 → 用 LoRA 风格微调或先做小规模可行性验证</li><li>评测复杂 → 分阶段：先证 SS 准确，再加 aa，最后联合</li></ul>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> MICA (bioRxiv 2025) combines cryo-EM + AlphaFold3 but only at the <em>output level</em> (postprocessing). No dataset has the <strong>joint (density, sequence, structure, QC) multi-modal alignment</strong> that ESM-3-style training requires. Plan A is the first with all four modalities perfectly aligned across 11K entries — the necessary substrate for a cryo-EM analog of ESM-3.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：MICA (bioRxiv 2025) 整合冷冻电镜+AlphaFold3 但只在<em>输出层</em>（后处理）。没有数据集有 ESM-3 风格训练所需的 <strong>(密度, 序列, 结构, QC) 多模态联合对齐</strong>。Plan A 是首个在 11K 条目上四模态完美对齐的——这是冷冻电镜版 ESM-3 必需的基础。`,
+      impact: `<strong>If successful:</strong> Becomes the cryo-EM analog of ESM-3 / AlphaFold-3 — a single model that, given any cryo-EM density, jointly predicts sequence + structure + confidence. Would be the most-cited paper from the structural biology AI community in the year published.`,
+      impact_zh: `<strong>如果成功</strong>：成为冷冻电镜版的 ESM-3 / AlphaFold-3 —— 单一模型给定任意密度图就能联合预测序列 + 结构 + 置信度。会是当年结构生物学 AI 社区被引最多的论文。`,
 
       tags: ['Multimodal Foundation Model', 'ESM-3-style', '12-18 person-months', 'Nature']
     }
@@ -129,6 +145,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>ChimeraX 模拟与真实噪声分布不同 → 用 mixture training：N2N + 我们的监督联合训练。</p>`,
       risks_zh: `<p>ChimeraX 模拟与真实噪声分布不同 → 用混合训练：N2N + 我们的监督联合训练。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> Topaz-Denoise (Bepler, Nat Commun 2020), CryoCARE, Warp — all use Noise2Noise because <em>they have no clean ground truth</em>. The 2025 ScienceDirect labeled denoising dataset has only 650 maps and lacks paired noisy/clean. Plan A provides the first <strong>11,000 (real_noisy, ChimeraX_clean_simulated)</strong> pairs at 1 Å voxel — breaking the fundamental data limitation that has held cryo-EM denoising back for 5 years.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：Topaz-Denoise (Bepler, Nat Commun 2020)、CryoCARE、Warp 都用 Noise2Noise 因为<em>它们没有 clean ground truth</em>。2025 ScienceDirect 标注去噪数据集只有 650 个 map 且没有噪声/干净配对。Plan A 提供首个 <strong>11,000 个 (真实噪声, ChimeraX 干净模拟) 配对</strong>，体素 1 Å——突破阻碍冷冻电镜去噪 5 年的根本数据限制。`,
+      impact: `<strong>If successful:</strong> Doubles the <em>effective</em> resolution of every cryo-EM map in EMDB — a structural biology community-wide impact comparable to the introduction of Topaz-Denoise itself.`,
+      impact_zh: `<strong>如果成功</strong>：将 EMDB 中每张冷冻电镜图的<em>有效</em>分辨率翻倍——对结构生物学社区的影响堪比 Topaz-Denoise 当年的推出。`,
 
       tags: ['Supervised Denoising', '3D U-Net', '4-6 person-months', 'Nature Methods']
     },
@@ -153,6 +173,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>幻觉风险：模型可能"编造"高分辨率细节。缓解：(1) 用 PHENIX CC 作为评测标准（不只是 PSNR）；(2) 输出 uncertainty map；(3) 严格区分"显示用"和"建模用"两种 mode。</p>`,
       risks_zh: `<p>幻觉风险：模型可能"编造"高分辨率细节。缓解：(1) 用 PHENIX CC 作为评测标准（不只是 PSNR）；(2) 输出不确定性图；(3) 严格区分"显示用"和"建模用"两种模式。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> EMReady2 (bioRxiv 2025) and CryoTEN (Bioinformatics 2025) train on single-resolution data — they cannot generalize to arbitrary target resolution. DiffModeler (PMC 2024) only does backbone tracing, not full density restoration. Plan A's <em>cross-resolution pairs</em> (same protein at multiple resolutions across the dataset, plus Gold-tier clean ground truth) is the unique substrate for conditional resolution-controllable generation.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：EMReady2 (bioRxiv 2025) 和 CryoTEN (Bioinformatics 2025) 在单分辨率数据训练，无法泛化到任意目标分辨率。DiffModeler (PMC 2024) 只做骨架追踪，不是密度恢复。Plan A 的<em>跨分辨率配对</em>（同蛋白多分辨率条目 + Gold 档干净真值）是分辨率条件可控生成的独家基础。`,
+      impact: `<strong>If successful:</strong> Becomes the 'NeRF for cryo-EM' — users specify a target resolution and the model synthesizes the corresponding density. Would be referenced in cryo-EM tutorials forever.`,
+      impact_zh: `<strong>如果成功</strong>：成为冷冻电镜界的 'NeRF'——用户指定目标分辨率，模型合成对应密度图。会永久出现在冷冻电镜教程里。`,
 
       tags: ['Latent Diffusion', 'Flow Matching', '6-9 person-months', 'Nature Methods']
     },
@@ -177,6 +201,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>风险低：是已有方法的"加 Q-score 条件"扩展，工程上容易实现。</p>`,
       risks_zh: `<p>风险低：是已有方法的"加 Q-score 条件"扩展，工程上易实现。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> DeepEMhancer (Comm Biol 2021) and EMReady2 apply uniform sharpening. They lack <em>per-atom Q-score truth</em> for spatial modulation. Plan A is the first dataset to ship Pintilie Q-scores (Nat Methods 2020) for every backbone atom of every entry — enabling spatially-aware sharpening that respects local quality.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：DeepEMhancer (Comm Biol 2021) 和 EMReady2 应用均匀锐化，缺乏<em>每原子 Q-score 真值</em>来做空间调制。Plan A 是首个为每个条目每个骨架原子都附带 Pintilie Q-score (Nat Methods 2020) 的数据集——使尊重局部质量的空间感知锐化成为可能。`,
+      impact: `<strong>If successful:</strong> Becomes the default sharpening tool used by every cryo-EM lab, replacing one-size-fits-all approaches and dramatically improving manual model building quality.`,
+      impact_zh: `<strong>如果成功</strong>：成为每个冷冻电镜实验室默认的锐化工具，取代一刀切的方法，大幅提升人工建模质量。`,
 
       tags: ['Local Sharpening', 'Q-score Conditional', '2-3 person-months', 'Bioinformatics']
     }
@@ -206,6 +234,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>低分辨率下界面残基不易区分（CA 模糊）。缓解：把 5+ Å 数据作为辅助评测，主结果聚焦 < 4 Å。</p>`,
       risks_zh: `<p>低分辨率下界面残基不易区分（CA 模糊）。缓解：5+ Å 数据作辅助评测，主结果聚焦 < 4 Å。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> MaSIF (Gainza, Nat Methods 2020), PInet, AlphaFold-Multimer — all require <em>atomic coordinates</em>. AFM has only 60% dimer success rate, 23% high-accuracy on hard heteromeric targets. No dataset has <em>(density_voxel, interface_label)</em> paired training data. Plan A's <strong>label_interface</strong> across 11K bio-assemblies is <em>uniquely</em> the substrate for this method.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：MaSIF (Gainza, Nat Methods 2020)、PInet、AlphaFold-Multimer 全部要<em>原子坐标</em>。AFM 二聚体仅 60% 成功率，难异源界面仅 23% 高精度。没有数据集有<em>(密度体素, 界面标签)</em>配对训练数据。Plan A 的 <strong>label_interface</strong> 覆盖 11K 生物组装体，<em>独家</em>提供这种方法的基础。`,
+      impact: `<strong>If successful:</strong> Allows cryo-EM specialists to extract protein-protein interaction information <em>days after data collection</em> instead of months after model building — fundamentally changing the cryo-EM workflow.`,
+      impact_zh: `<strong>如果成功</strong>：让冷冻电镜专家能在<em>数据采集后几天</em>而非建模后数月，提取蛋白-蛋白相互作用信息——根本改变冷冻电镜工作流。`,
 
       tags: ['Interface Prediction', '3D U-Net', '4-6 person-months', 'Nature Methods']
     },
@@ -230,6 +262,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>类别不均衡（dimer 多，T/I 对称少）→ 用 class-balanced sampling 或 focal loss。</p>`,
       risks_zh: `<p>类别不均衡（二聚体多，T/I 对称少）→ 用类别平衡采样或 focal loss。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> PISA (Krissinel 2007) needs atomic models. Current methods judge oligomeric state by visual inspection at low resolution. Plan A's <em>label_chain</em> (already expanded to full bio-assemblies with chain count metadata) provides 11K labeled examples — the largest oligomeric state training set ever.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：PISA (Krissinel 2007) 需要原子模型。当前方法在低分辨率下靠目视判断寡聚态。Plan A 的 <em>label_chain</em>（已展开到完整生物组装体，附带链数元数据）提供 11K 个标注样本——史上最大的寡聚态训练集。`,
+      impact: `<strong>If successful:</strong> EMDB depositions can automatically include oligomeric state in the metadata at submission time, dramatically improving database searchability and downstream analyses.`,
+      impact_zh: `<strong>如果成功</strong>：EMDB 沉积可在提交时自动包含寡聚态元数据，大幅提升数据库可搜索性和下游分析。`,
 
       tags: ['Classification', 'Oligomeric State', '2-3 person-months', 'Bioinformatics']
     },
@@ -254,6 +290,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>表面提取在低分辨率下不稳定 → 用 Gold tier 条目作为主训练集。</p>`,
       risks_zh: `<p>表面提取在低分辨率下不稳定 → 用 Gold tier 条目作为主训练集。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> MaSIF (Nat Methods 2020) learns fingerprints from atomic surfaces — useless when atomic models don't exist. Plan A's <em>label_segment</em> for surface extraction + <em>label_interface</em> for contrastive learning + <em>label_aa</em> for chemistry — these three combined provide the unique substrate for density-based MaSIF.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：MaSIF (Nat Methods 2020) 从原子表面学习指纹——没有原子模型就废。Plan A 的 <em>label_segment</em>（表面提取）+ <em>label_interface</em>（对比学习）+ <em>label_aa</em>（化学性质）—— 三者组合是基于密度的 MaSIF 的独家基础。`,
+      impact: `<strong>If successful:</strong> Enables fragment-based drug discovery directly from cryo-EM density — find binding sites and predict ligand poses before atomic model building, accelerating drug discovery pipelines by months.`,
+      impact_zh: `<strong>如果成功</strong>：让基于片段的药物发现直接从冷冻电镜密度图启动——在原子建模前就识别结合位点、预测配体姿势，加速药物发现数月。`,
 
       tags: ['Surface Learning', 'MaSIF-style', '6-9 person-months', 'Nature Methods']
     }
@@ -283,6 +323,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>Merizo 本身对 cryo-EM 模型可能不完美 → Q-score 过滤掉低质量 domain 标签。</p>`,
       risks_zh: `<p>Merizo 本身对冷冻电镜模型可能不完美 → 用 Q-score 过滤低质量 domain 标签。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> Merizo (Lau, Nat Commun 2023), SWORD, DPAM all require atomic coordinates. No method does domain segmentation from density alone. Plan A is the first to apply Merizo to 11K atomic models AND propagate the labels to corresponding density voxels — creating the first <em>(density, voxel-level domain ID)</em> paired training set in existence.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：Merizo (Lau, Nat Commun 2023)、SWORD、DPAM 都要原子坐标。没有方法仅从密度做 domain 分割。Plan A 是首个把 Merizo 应用到 11K 原子模型并把标签传播到对应密度体素的——创造了史上首个 <em>(密度, 体素级 domain ID)</em> 配对训练集。`,
+      impact: `<strong>If successful:</strong> Enables domain-level analysis of cryo-EM maps that lack atomic models (~40% of EMDB), unlocking comparative studies of macromolecular evolution across thousands of unmodelled assemblies.`,
+      impact_zh: `<strong>如果成功</strong>：让缺乏原子模型的冷冻电镜图（占 EMDB 约 40%）能进行 domain 级分析，解锁数千个未建模组装体的大分子进化比较研究。`,
 
       tags: ['Instance Segmentation', 'Density-Only', '4-6 person-months', 'Nature Methods']
     },
@@ -307,6 +351,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>同 PDB 不同 EMDB 的对可能太少（EMDB 中真正重复样品不多）→ 用 data augmentation：人工降分辨率、加噪声生成 positive pair。</p>`,
       risks_zh: `<p>同 PDB 不同 EMDB 的对可能不多 → 用数据增强：人工降分辨率、加噪声生成 positive pair。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> Foldseek (van Kempen, Nat Biotechnol 2024) and Foldseek-Multimer (Nat Methods 2025) both require atomic structures (3Di alphabet). Foldclass/Merizo-search (Bioinform Adv 2025) also needs atoms. No method searches density similarity. Plan A's 11K density + atomic model pairs (with domain partitioning via label_domain) enables training a density-space embedder that maps to the same space as Foldseek's 3Di.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：Foldseek (van Kempen, Nat Biotechnol 2024) 和 Foldseek-Multimer (Nat Methods 2025) 都要原子结构（3Di 字母表）。Foldclass/Merizo-search (Bioinform Adv 2025) 也要原子。没有方法做密度相似搜索。Plan A 的 11K 密度+原子配对（含 label_domain 域划分）使训练映射到 Foldseek 3Di 同空间的密度嵌入器成为可能。`,
+      impact: `<strong>If successful:</strong> Becomes the 'reverse image search' for cryo-EM — drop in any density map and find structurally similar entries across all of EMDB instantly, accelerating discovery of novel folds and convergent evolution.`,
+      impact_zh: `<strong>如果成功</strong>：成为冷冻电镜的 '以图搜图'——丢入任意密度图，立即在整个 EMDB 找到结构相似条目，加速新折叠和趋同进化的发现。`,
 
       tags: ['Contrastive Learning', 'Structural Search', '6-9 person-months', 'Nature Biotechnology']
     },
@@ -331,6 +379,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>风险低。</p>`,
       risks_zh: `<p>风险低。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> DSSP, STRIDE — all need atomic coordinates. No dataset has <em>(density_voxel, SS_class)</em> paired training data at scale. Plan A's <em>label_ss</em> at every CA voxel across 11K entries is the unique substrate for end-to-end density-to-SS prediction.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：DSSP、STRIDE 都要原子坐标。没有数据集大规模提供 <em>(密度体素, SS 类)</em> 配对训练数据。Plan A 在 11K 条目每个 CA 体素的 <em>label_ss</em> 是端到端密度到二级结构预测的独家基础。`,
+      impact: `<strong>If successful:</strong> Provides cryo-EM specialists with instant secondary structure topology — knowing 'this is an all-alpha protein' or 'there's a beta-barrel here' before atomic modeling guides experimental design and validation.`,
+      impact_zh: `<strong>如果成功</strong>：让冷冻电镜专家瞬间获得二级结构拓扑——在原子建模前就知道'这是全 α 蛋白'或'这里有 β-桶'，指导实验设计和验证。`,
 
       tags: ['Secondary Structure', 'Density-Only', '2-3 person-months', 'Bioinformatics']
     }
@@ -360,6 +412,10 @@ window.RESEARCH_DATA = {
 
       risks: `<ul><li>11K 数据相对 Cryo-IEF 的 65M 还是小 → 用 augmentation + multi-task self-supervision 补偿</li><li>训练成本高 → 分阶段：先证 2D backbone，再扩 3D</li></ul>`,
       risks_zh: `<ul><li>11K 数据相对 Cryo-IEF 的 6500 万还是小 → 用增强 + 多任务自监督补偿</li><li>训练成本高 → 分阶段：先验证 2D 主干，再扩展 3D</li></ul>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> Cryo-IEF (Nat Methods 2025) is <em>2D micrograph only</em> (65M particles). CryoCRAB (Sci Data 2025) is also 2D (746 proteins, 116.8 TB raw movies, but no 3D structure annotation). CryoFM (Zhou 2024) is 3D but on <em>synthetic curated maps</em>, not real EMDB. Plan A is the <strong>first real 3D EMDB + multi-channel structural annotation</strong> dataset — the only viable foundation for a cryo-EM 3D vision foundation model.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：Cryo-IEF (Nat Methods 2025) <em>仅 2D 显微图</em>（6500 万粒子）。CryoCRAB (Sci Data 2025) 也是 2D（746 蛋白，116.8 TB 原片，无 3D 结构标注）。CryoFM (Zhou 2024) 是 3D 但在<em>合成 curated map</em>，不是真实 EMDB。Plan A 是<strong>首个真实 3D EMDB + 多通道结构标注</strong>数据集——冷冻电镜 3D 视觉基础模型的唯一可行基础。`,
+      impact: `<strong>If successful:</strong> Becomes the cryo-EM equivalent of SAM (Segment Anything) — a single pretrained model that powers all downstream cryo-EM tasks via few-shot fine-tuning. The most strategically important paper for the structural biology AI community.`,
+      impact_zh: `<strong>如果成功</strong>：成为冷冻电镜版的 SAM（Segment Anything）——单一预训练模型通过 few-shot 微调驱动所有下游任务。结构生物学 AI 社区战略意义最强的论文。`,
 
       tags: ['Foundation Model', 'MAE / Contrastive', 'Multi-modal', '12-18 person-months', 'Nature Methods']
     },
@@ -384,6 +440,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>PHENIX 计算的 Q-score 本身有噪声 → 用 Plan A 的 Gold tier 作为高质量训练子集。</p>`,
       risks_zh: `<p>PHENIX 计算的 Q-score 本身有噪声 → 用 Plan A 的 Gold tier 作为高质量训练子集。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> DeepQs trained on only 496 pairs. DAQ-score lacks scale. No method has unified <em>per-voxel + per-residue + global</em> quality output. Plan A is <strong>22× larger than DeepQs</strong> with PHENIX-computed multi-metric ground truth — the only data resource that can train a unified validator.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：DeepQs 仅 496 对训练。DAQ-score 缺规模。没有方法做统一的<em>每体素+每残基+全局</em>质量输出。Plan A 是 <strong>DeepQs 的 22 倍</strong>且有 PHENIX 计算的多指标真值——唯一能训练统一验证器的数据资源。`,
+      impact: `<strong>If successful:</strong> Gets integrated directly into wwPDB validation reports as the official AI validator — every PDB deposition in the world goes through this model, making it the most-deployed AI in structural biology.`,
+      impact_zh: `<strong>如果成功</strong>：直接整合进 wwPDB 验证报告作为官方 AI 验证器——全世界每个 PDB 沉积都经过这个模型，成为结构生物学中部署最广的 AI。`,
 
       tags: ['QC / Validation', 'Multi-task', '6-9 person-months', 'Nature Methods']
     },
@@ -408,6 +468,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>合成错误与真实错误分布不同 → 用 mixture training，加少量真实错误案例做 fine-tuning。</p>`,
       risks_zh: `<p>合成错误与真实错误分布不同 → 混合训练，加少量真实错误案例做 fine-tuning。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> No existing tool detects chain misassignment or residue misidentification automatically. Plan A's combination of <em>label_chain + label_aa + label_qscore</em> ground truth across 11K entries is unique — only Plan A enables training synthetic-error detectors that generalize.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：没有现有工具能自动检测链错配或残基误识别。Plan A 的 <em>label_chain + label_aa + label_qscore</em> 真值组合覆盖 11K 条目独家——只有 Plan A 能训练泛化的合成错误检测器。`,
+      impact: `<strong>If successful:</strong> Prevents thousands of erroneous depositions from entering PDB, improving the foundational truth that all downstream structural biology relies on. wwPDB and EMDB integration is the obvious next step.`,
+      impact_zh: `<strong>如果成功</strong>：阻止数千个错误沉积进入 PDB，提升所有下游结构生物学依赖的基础真值。wwPDB 和 EMDB 整合是显然下一步。`,
 
       tags: ['Error Detection', 'wwPDB Service', '4-6 person-months', 'Nature Communications']
     },
@@ -432,6 +496,10 @@ window.RESEARCH_DATA = {
 
       risks: `<p>密度和序列之间信息密度差距大（一张 100³ 体素图 vs 200 氨基酸序列） → 用 hierarchical pooling 让密度变成 sequence-length 表示。</p>`,
       risks_zh: `<p>密度和序列之间信息密度差距大（100³ 体素图 vs 200 氨基酸序列） → 用 hierarchical pooling 让密度变成 sequence-length 表示。</p>`,
+      unique_advantage: `<strong>Why ONLY Plan A can do this:</strong> AlphaFold operates in sequence-structure space, ESM in sequence space. <em>No dataset has 4-modality (density, sequence, structure, QC) perfectly aligned at the entry level</em>. Plan A is the first — enabling CLIP-style contrastive learning across all four modalities.`,
+      unique_advantage_zh: `<strong>为什么只有 Plan A 能做这件事</strong>：AlphaFold 在序列-结构空间，ESM 在序列空间。<em>没有数据集有条目级完美对齐的四模态（密度、序列、结构、QC）</em>。Plan A 是首个——使四模态 CLIP 风格对比学习成为可能。`,
+      impact: `<strong>If successful:</strong> Becomes the 'foundational layer' connecting all of structural biology — query by any modality, get matched answers in all four. The Rosetta Stone of structural biology AI.`,
+      impact_zh: `<strong>如果成功</strong>：成为结构生物学的'基础层'——以任一模态查询，在所有四个模态中获得对应答案。结构生物学 AI 的'罗塞塔石碑'。`,
 
       tags: ['Multimodal', 'CLIP-style', 'Foundation', '6-9 person-months', 'NeurIPS / Nature Methods']
     }
