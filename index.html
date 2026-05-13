@@ -340,7 +340,8 @@ body.zh-mode .zh{display:block}
 </div>
 
 <footer>
-  <div class="fl">Plan A &nbsp;/&nbsp; A 计划</div>
+  <div class="fl en">Plan A</div>
+  <div class="fl zh">A 计划</div>
   <div class="fm">
     Built with <strong>PHENIX 2.0</strong> · <strong>ChimeraX 1.11</strong> · <strong>Merizo</strong> · <strong>gemmi</strong> · <strong>mrcfile</strong><br>
     <span class="en">Data from <a href="https://www.ebi.ac.uk/emdb/">EMDB</a> &amp; <a href="https://www.rcsb.org/">RCSB PDB</a>
@@ -741,6 +742,7 @@ function openResearchModal(directionId){
           ${p.evaluation ? `<div class="proj-section"><div class="proj-section-title">📊 ${ZH?'评估方案':'Evaluation'}</div><div class="proj-section-content">${ZH ? (p.evaluation_zh || p.evaluation) : p.evaluation}</div></div>` : ''}
           ${p.publication ? `<div class="proj-section"><div class="proj-section-title">🏆 ${ZH?'预期发表':'Publication Target'}</div><div class="proj-section-content">${ZH ? (p.publication_zh || p.publication) : p.publication}</div></div>` : ''}
           ${p.impact ? `<div class="proj-section"><div class="proj-section-title" style="color:var(--accent2)">🚀 ${ZH?'如果成功的影响':'If Successful'}</div><div class="proj-section-content">${ZH ? (p.impact_zh || p.impact) : p.impact}</div></div>` : ''}
+          ${p.key_challenges ? `<div class="proj-section"><div class="proj-section-title" style="color:#f59e0b">⚡ ${ZH?'关键挑战与攻克方案':'Key Challenges & How We Overcome'}</div><div class="proj-section-content">${ZH ? (p.key_challenges_zh || p.key_challenges) : p.key_challenges}</div></div>` : ''}
           ${p.risks ? `<div class="proj-section"><div class="proj-section-title">⚠️ ${ZH?'风险与挑战':'Risks'}</div><div class="proj-section-content">${ZH ? (p.risks_zh || p.risks) : p.risks}</div></div>` : ''}
           ${p.tags && p.tags.length ? `<div class="proj-tier">${p.tags.map(t=>`<span class="proj-tier-item">${t}</span>`).join('')}</div>` : ''}
         </div>
