@@ -728,7 +728,7 @@ function openResearchModal(directionId){
       <div class="proj" id="proj-${r.id}-${idx}">
         <div class="proj-header" onclick="toggleProject('${r.id}', ${idx})">
           <div class="proj-info">
-            <div class="proj-num">${ZH?'项目':'PROJECT'} ${String(idx+1).padStart(2,'0')}</div>
+            <div class="proj-num">${ZH ? (p.tier_label_zh || '项目') : (p.tier_label_en || 'PROJECT')}  &nbsp;·&nbsp;  ${String(idx+1).padStart(2,'0')}</div>
             <div class="proj-name">${ZH ? (p.title_zh || p.title_en) : p.title_en}</div>
             <div class="proj-summary">${ZH ? (p.summary_zh || p.summary_en) : p.summary_en}</div>
           </div>
